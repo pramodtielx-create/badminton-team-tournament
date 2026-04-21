@@ -186,73 +186,34 @@ elif menu == "Fixtures":
 # =================================================
 # RESULTS (PUBLIC)
 # =================================================
-elif menu == "Enter Results":
-    st.subheader("📝 Enter Match Results")
+# =================================================
+# RESULTS (PUBLIC – READ ONLY)
+# =================================================
+elif menu == "Results":
+    st.subheader("📊 Match Results")
 
-    if not st.session_state.is_admin:
-        st.warning("🔒 Admin access required")
+    results = load_json("data/results.json", [])
+
+    if not results:
+        st.warning("No results entered yet.")
     else:
-        tie = st.selectbox(
-            "Select Tie",
-            fixtures,
-            format_func=lambda x: f"Tie {x['tie_id']} — {x['team_a']} vs {x['team_b']}"
-        )
+        for r in results:
+            c1, c2, c3 = st.columns([1, 4, 1])
 
-        match_results = []
+            with c1:
+                show_logo(r["team_a"])
 
-        for m in range(3):
-            st.markdown(f"### Match {m + 1}")
-            sets = []
+            with c2:
+                st.subheader(f"{r['team_a']} VS {r['team_b']}")
 
-            for s in range(3):
-                c1, c2 = st.columns(2)
+            with c3:
+                show_logo(r["team_b"])
 
-                with c1:
-                    a = st.number_input(
-                        f"{tie['team_a']} (Set {s + 1})",
-                        min_value=0,
-                        max_value=30,
-                        key=f"a_{tie['tie_id']}_{m}_{s}"
-                    )
+            for i, m in enumerate(r["matches"], start=1):
+                if m.get("sets"):
+                    score = " | ".join(f"{s[0]}-{s[1]}" for s in m["sets"])
+                    st.write(f"Match {i}: {score}")
+                else:
+                    st.write(f"Match {i}: —")
 
-                with c2:
-                    b = st.number_input(
-                        f"{tie['team_b']} (Set {s + 1})",
-                        min_value=0,
-                        max_value=30,
-                        key=f"b_{tie['tie_id']}_{m}_{s}"
-                    )
-
-                if a > 0 or b > 0:
-                    sets.append([a, b])
-
-            match_results.append({"sets": sets})
-
-        if st.button("✅ Save Results"):
-            tie_result = next(
-                (
-                    r for r in results
-                    if r["tie_id"] == tie["tie_id"]
-                ),
-                {
-                    "tie_id": tie["tie_id"],
-                    "team_a": tie["team_a"],
-                    "team_b": tie["team_b"],
-                    "matches": [{}, {}, {}]
-                }
-            )
-
-            for idx, match in enumerate(match_results):
-                if match["sets"]:
-                    tie_result["matches"][idx] = match
-
-            updated_results = [
-                r for r in results
-                if r["tie_id"] != tie["tie_id"]
-            ]
-            updated_results.append(tie_result)
-
-            save_json("data/results.json", updated_results)
-
-            st.success("✅ Results saved (previous matches preserved)")
-            st.rerun()
+            st.divider()
