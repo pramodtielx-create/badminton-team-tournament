@@ -73,10 +73,10 @@ teams_data = {
 }
 
 team_logos = {
-    "Smash Titans": "assets/logos/smash_titans.jpeg",
-    "Quantum Force": "assets/logos/quantum_force.jpeg",
-    "Racket Scientists": "assets/logos/racket_scientists.jpeg",
-    "Net Ninjas": "assets/logos/net_ninjas.jpeg"
+    "Smash Titans": "assets/Logos/smash_titans.jpeg",
+    "Quantum Force": "assets/Logos/quantum_force.jpeg",
+    "Racket Scientists": "assets/Logos/racket_scientists.jpeg",
+    "Net Ninjas": "assets/Logos/net_ninjas.jpeg"
 }
 
 def show_logo(team, width=60):
