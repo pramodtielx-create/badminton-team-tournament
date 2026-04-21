@@ -13,7 +13,7 @@ st.set_page_config(
 st.title("🏸 Badminton Tournament")
 
 # -------------------------------------------------
-# TEAM COMBINATIONS (PLAYERS PER TEAM)
+# TEAM DATA + LOGOS (JPEG)
 # -------------------------------------------------
 teams_data = {
     "Smash Titans": [
@@ -32,6 +32,13 @@ teams_data = {
         "Jaswanth", "Sandeepk", "Ritesh",
         "Vikram", "Pramod", "Deepak T"
     ]
+}
+
+team_logos = {
+    "Smash Titans": "assets/logos/smash_titans.jpeg",
+    "Quantum Force": "assets/logos/quantum_force.jpeg",
+    "Racket Scientists": "assets/logos/racket_scientists.jpeg",
+    "Net Ninjas": "assets/logos/net_ninjas.jpeg"
 }
 
 # -------------------------------------------------
@@ -70,10 +77,10 @@ menu = st.radio(
 # -------------------------------------------------
 if menu == "Home":
     st.success("✅ Tournament system is running correctly")
-    st.write("Use the menu above to view teams, fixtures, enter results, and see standings.")
+    st.write("Use the menu above to navigate through the tournament.")
 
 # -------------------------------------------------
-# TEAMS (TEAM COMBINATIONS)
+# TEAMS (WITH LOGOS)
 # -------------------------------------------------
 elif menu == "Teams":
     st.subheader("👥 Team Combinations")
@@ -81,25 +88,40 @@ elif menu == "Teams":
     cols = st.columns(2)
     for idx, (team, players) in enumerate(teams_data.items()):
         with cols[idx % 2]:
-            st.markdown(f"### 🏸 {team}")
+            col_logo, col_name = st.columns([1, 4])
+
+            with col_logo:
+                st.image(team_logos[team], width=80)
+
+            with col_name:
+                st.markdown(f"### {team}")
+
             for p in players:
                 st.write(f"• {p}")
 
 # -------------------------------------------------
-# FIXTURES
+# FIXTURES (WITH LOGOS)
 # -------------------------------------------------
 elif menu == "Fixtures":
     st.subheader("📅 Fixtures")
 
     for tie in fixtures:
-        st.markdown(
-            f"""
-            ### Tie {tie['tie_id']}
-            **{tie['team_a']} vs {tie['team_b']}**
-            """
-        )
+        col1, col2, col3 = st.columns([1, 3, 3])
+
+        with col1:
+            st.image(team_logos[tie["team_a"]], width=60)
+            st.image(team_logos[tie["team_b"]], width=60)
+
+        with col2:
+            st.markdown(f"### {tie['team_a']}")
+
+        with col3:
+            st.markdown(f"### {tie['team_b']}")
+
         for i, match in enumerate(tie["matches"], start=1):
             st.write(f"Match {i}: {match[0]}  vs  {match[1]}")
+
+        st.divider()
 
 # -------------------------------------------------
 # ENTER RESULTS
@@ -155,13 +177,13 @@ elif menu == "Enter Results":
         st.success("✅ Results saved successfully")
 
 # -------------------------------------------------
-# STANDINGS
+# STANDINGS (WITH LOGOS)
 # -------------------------------------------------
 elif menu == "Standings":
     st.subheader("📊 Team Standings")
 
     if len(results) == 0:
-        st.warning("⚠️ No results entered yet. Enter match results to see standings.")
+        st.warning("⚠️ No results entered yet. Enter results to see standings.")
     else:
         teams = set()
         for t in fixtures:
@@ -236,4 +258,20 @@ elif menu == "Standings":
             ascending=False
         )
 
-        st.dataframe(df, width="stretch")
+        for team in df.index:
+            col1, col2 = st.columns([1, 8])
+
+            with col1:
+                st.image(team_logos[team], width=50)
+
+            with col2:
+                row = df.loc[team]
+                st.markdown(
+                    f"""
+                    **{team}**  
+                    Played: {row['Played']} | Won: {row['Won']} | Points: {row['Points']}  
+                    Set Diff: {row['Set Diff']} | Point Diff: {row['Point Diff']}
+                    """
+                )
+
+            st.divider()
