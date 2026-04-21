@@ -1,7 +1,24 @@
 import streamlit as st
 import json
 import pandas as pd
-
+teams_data = {
+    "Smash Titans": [
+        "Omkar", "Nishit", "Ganesh",
+        "Sandeep W", "Amit", "Jayant"
+    ],
+    "Quantum Force": [
+        "Rajendra", "Aniket", "Deepak L",
+        "Rahul", "Manmohan", "Prashant"
+    ],
+    "Racket Scientists": [
+        "Kiran", "Kaustubh", "Piyush",
+        "Pradyum", "Amol S", "Amol P"
+    ],
+    "Net Ninjas": [
+        "Jaswanth", "Sandeepk", "Ritesh",
+        "Vikram", "Pramod", "Deepak T"
+    ]
+}
 # -------------------------------------------------
 # PAGE CONFIG
 # -------------------------------------------------
