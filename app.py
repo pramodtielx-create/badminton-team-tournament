@@ -1,7 +1,7 @@
 import streamlit as st
 import json
-import pandas as pd
 import os
+import pandas as pd
 from collections import defaultdict, deque
 
 # =================================================
@@ -15,30 +15,6 @@ st.title("🏸 Badminton Tournament")
 # =================================================
 if "is_admin" not in st.session_state:
     st.session_state.is_admin = False
-
-# =================================================
-# RULES (SAFE STRING)
-# =================================================
-RULES_HTML = """
-<div style="background-color:#f8f9fa;padding:25px;border-radius:14px;
-border-left:6px solid #1f77b4;max-height:80vh;overflow-y:auto;">
-<h2>🏸 Mathi Gang Badminton Tournament</h2>
-<h3>Official Rules & Competition Format</h3>
-<ul>
-<li>League + Knockout format</li>
-<li>3 fixed doubles pairs per team</li>
-<li>3 matches per tie, win 2 to win tie</li>
-<li>Best of 3 sets, 21 points, win by 2</li>
-<li>At 29–29, first to 30 wins</li>
-<li>Top 2 teams qualify for Final</li>
-<li>No coaching during rallies</li>
-<li>No equipment abuse</li>
-</ul>
-<p style="font-size:13px;color:#555;">
-✅ Aligned with international badminton standards
-</p>
-</div>
-"""
 
 # =================================================
 # TEAM DATA + LOGOS
@@ -65,7 +41,7 @@ def show_logo(team, width=60):
         st.write("🖼️")
 
 # =================================================
-# DATA LOAD / SAVE
+# DATA HELPERS
 # =================================================
 def load_json(path, default):
     try:
@@ -91,6 +67,7 @@ menu = st.radio(
         "Home",
         "Teams",
         "Fixtures",
+        "Results",
         "Team Standings",
         "Player Standings",
         "Final",
@@ -104,7 +81,8 @@ menu = st.radio(
 # HOME
 # =================================================
 if menu == "Home":
-    st.markdown(RULES_HTML, unsafe_allow_html=True)
+    st.success("✅ Tournament system running")
+    st.info("League → Top 2 → Final | Results visible to everyone")
 
 # =================================================
 # ADMIN LOGIN
@@ -130,7 +108,6 @@ elif menu == "Admin Login":
 # TEAMS
 # =================================================
 elif menu == "Teams":
-    st.subheader("👥 Team Combinations")
     for team, players in teams_data.items():
         c1, c2 = st.columns([1,5])
         with c1:
@@ -145,13 +122,12 @@ elif menu == "Teams":
 # FIXTURES
 # =================================================
 elif menu == "Fixtures":
-    st.subheader("📅 Fixtures")
     for tie in fixtures:
         c1, c2, c3 = st.columns([1,4,1])
         with c1:
             show_logo(tie["team_a"])
         with c2:
-            st.subheader(f"{tie['team_a']}  VS  {tie['team_b']}")
+            st.subheader(f"{tie['team_a']} VS {tie['team_b']}")
         with c3:
             show_logo(tie["team_b"])
         for i, m in enumerate(tie["matches"], 1):
@@ -159,10 +135,33 @@ elif menu == "Fixtures":
         st.divider()
 
 # =================================================
+# RESULTS (PUBLIC)
+# =================================================
+elif menu == "Results":
+    st.subheader("📊 Match Results")
+
+    if not results:
+        st.warning("No results entered yet.")
+    else:
+        for r in results:
+            c1, c2, c3 = st.columns([1,4,1])
+            with c1:
+                show_logo(r["team_a"])
+            with c2:
+                st.subheader(f"{r['team_a']} VS {r['team_b']}")
+            with c3:
+                show_logo(r["team_b"])
+
+            for i, m in enumerate(r["matches"], 1):
+                score = " | ".join([f"{s[0]}-{s[1]}" for s in m["sets"]])
+                st.write(f"Match {i}: {score}")
+
+            st.divider()
+
+# =================================================
 # ENTER RESULTS (ADMIN ONLY)
 # =================================================
 elif menu == "Enter Results":
-    st.subheader("📝 Enter Match Results")
     if not st.session_state.is_admin:
         st.warning("🔒 Admin access required")
     else:
@@ -171,6 +170,7 @@ elif menu == "Enter Results":
             fixtures,
             format_func=lambda x: f"Tie {x['tie_id']} — {x['team_a']} vs {x['team_b']}"
         )
+
         match_results = []
         for m in range(3):
             st.markdown(f"### Match {m+1}")
@@ -178,9 +178,17 @@ elif menu == "Enter Results":
             for s in range(3):
                 c1, c2 = st.columns(2)
                 with c1:
-                    a = st.number_input("Team A", 0, 30, key=f"a{m}{s}")
+                    a = st.number_input(
+                        f"{tie['team_a']}",
+                        0, 30,
+                        key=f"a_{tie['tie_id']}_{m}_{s}"
+                    )
                 with c2:
-                    b = st.number_input("Team B", 0, 30, key=f"b{m}{s}")
+                    b = st.number_input(
+                        f"{tie['team_b']}",
+                        0, 30,
+                        key=f"b_{tie['tie_id']}_{m}_{s}"
+                    )
                 if a or b:
                     sets.append([a, b])
             match_results.append({"sets": sets})
@@ -200,10 +208,91 @@ elif menu == "Enter Results":
 # TEAM STANDINGS
 # =================================================
 elif menu == "Team Standings":
-    st.subheader("📊 Team Standings")
+    table = defaultdict(int)
+    for r in results:
+        table[r["team_a"]] += 2
+    df = pd.DataFrame.from_dict(table, orient="index", columns=["Points"])
+    st.dataframe(df.sort_values("Points", ascending=False), width="stretch")
+
+# =================================================
+# PLAYER STANDINGS + PLAYER OF TOURNAMENT
+# =================================================
+elif menu == "Player Standings":
+    stats = defaultdict(lambda: {
+        "Team": "",
+        "Played": 0,
+        "Won": 0,
+        "Points": 0,
+        "Form": deque(maxlen=5)
+    })
+
+    for r in results:
+        fixture = next(f for f in fixtures if f["tie_id"] == r["tie_id"])
+        for i, m in enumerate(r["matches"]):
+            pair_a = fixture["matches"][i][0].split("/")
+            pair_b = fixture["matches"][i][1].split("/")
+            a_sets = b_sets = 0
+            for a,b in m["sets"]:
+                if a > b: a_sets += 1
+                else: b_sets += 1
+            a_win = a_sets > b_sets
+
+            for p in pair_a:
+                p = p.strip()
+                stats[p]["Team"] = r["team_a"]
+                stats[p]["Played"] += 1
+                stats[p]["Form"].append("✅" if a_win else "❌")
+                if a_win:
+                    stats[p]["Won"] += 1
+                    stats[p]["Points"] += 2
+
+            for p in pair_b:
+                p = p.strip()
+                stats[p]["Team"] = r["team_b"]
+                stats[p]["Played"] += 1
+                stats[p]["Form"].append("✅" if not a_win else "❌")
+                if not a_win:
+                    stats[p]["Won"] += 1
+                    stats[p]["Points"] += 2
+
+    dfp = pd.DataFrame.from_dict(stats, orient="index")
+    dfp["Recent Form"] = dfp["Form"].apply(lambda x: " ".join(list(x)))
+    dfp = dfp.sort_values(by=["Points","Won"], ascending=False)
+
+    st.dataframe(
+        dfp[["Team","Played","Won","Points","Recent Form"]],
+        width="stretch"
+    )
+
+    if not dfp.empty:
+        pot = dfp.index[0]
+        st.success(f"🥇 Player of the Tournament: **{pot}** ({dfp.loc[pot,'Team']})")
+
+# =================================================
+# FINAL (TOP 2)
+# =================================================
+elif menu == "Final":
     if not results:
-        st.warning("No results entered yet.")
+        st.warning("Final available after league results.")
     else:
-        table = defaultdict(lambda: {"Played":0,"Won":0,"Points":0})
+        standings = defaultdict(int)
         for r in results:
-            aw = bw = 0
+            standings[r["team_a"]] += 2
+
+        finalists = sorted(standings, key=standings.get, reverse=True)[:2]
+
+        c1, c2, c3 = st.columns([1,4,1])
+        with c1:
+            show_logo(finalists[0], 90)
+        with c2:
+            st.subheader(f"{finalists[0]} VS {finalists[1]}")
+        with c3:
+            show_logo(finalists[1], 90)
+
+        if final_result.get("sets"):
+            a = b = 0
+            for s in final_result["sets"]:
+                if s[0] > s[1]: a += 1
+                else: b += 1
+            winner = finalists[0] if a > b else finalists[1]
+            st.success(f"🏆 Champion: **{winner}**")
