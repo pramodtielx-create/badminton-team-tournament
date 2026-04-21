@@ -208,7 +208,14 @@ elif menu == "Results":
 # =================================================
 # ENTER RESULTS (ADMIN ONLY)
 # =================================================
-elif menu == "Enter Results":elif            "Select Tie",
+elif menu == "Enter Results":
+    st.subheader("📝 Enter Match Results")
+
+    if not st.session_state.is_admin:
+        st.warning("🔒 Admin access required")
+    else:
+        tie = st.selectbox(
+            "Select Tie",
             fixtures,
             format_func=lambda x: f"Tie {x['tie_id']} — {x['team_a']} vs {x['team_b']}"
         )
@@ -225,14 +232,16 @@ elif menu == "Enter Results":elif            "Select Tie",
                 with c1:
                     a = st.number_input(
                         f"{tie['team_a']} (Set {s + 1})",
-                        0, 30,
+                        min_value=0,
+                        max_value=30,
                         key=f"a_{tie['tie_id']}_{m}_{s}"
                     )
 
                 with c2:
                     b = st.number_input(
                         f"{tie['team_b']} (Set {s + 1})",
-                        0, 30,
+                        min_value=0,
+                        max_value=30,
                         key=f"b_{tie['tie_id']}_{m}_{s}"
                     )
 
@@ -241,7 +250,7 @@ elif menu == "Enter Results":elif            "Select Tie",
 
             match_results.append({"sets": sets})
 
-        # ✅ SAVE BUTTON (THIS WAS MISSING)
+        # ✅ SAVE BUTTON (CRITICAL)
         if st.button("✅ Save Results"):
             updated_results = [
                 r for r in results if r["tie_id"] != tie["tie_id"]
@@ -257,13 +266,4 @@ elif menu == "Enter Results":elif            "Select Tie",
             save_json("data/results.json", updated_results)
 
             st.success("✅ Results saved successfully")
-            st.rerun()   # 🔥 forces reload so Results/Standings update
-    st.subheader("📝 Enter Match Results")
-
-    if not st.session_state.is_admin:
-        st.warning("🔒 Admin access required")
-    else:
-        tie = st.selectbox(
-
-                if a or b:
-                    sets.append([a, b])
+            st.rerun()
