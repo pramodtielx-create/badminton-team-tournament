@@ -1,14 +1,28 @@
 import streamlit as st
 
 st.set_page_config(
-    page_title="Badminton Tournament",
+    page_title="🏸 Badminton Tournament",
     layout="wide"
 )
 
-st.title("🏸 Badminton Tournament App")
+st.title("🏸 Badminton Tournament")
 
-st.markdown("### ✅ App is running and rendering UI")
+menu = st.radio(
+    "Navigate",
+    ["Home", "Fixtures", "Standings", "Admin"],
+    horizontal=True
+)
 
-st.write("If you see this text, Streamlit is working correctly.")
+if menu == "Home":
+    st.success("✅ App is running correctly.")
+    st.write("Use the menu above to navigate.")
 
-st.button("Test Button")
+elif menu == "Fixtures":
+    st.info("Fixtures page – coming next")
+
+elif menu == "Standings":
+    st.info("Standings page – coming next")
+
+elif menu == "Admin":
+    st.info("Admin login – coming next")
+``
