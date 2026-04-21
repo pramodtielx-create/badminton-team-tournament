@@ -88,29 +88,165 @@ if menu == "Home":
         """
         <div style="
             background-color:#f8f9fa;
-            padding:20px;
-            border-radius:12px;
+            padding:25px;
+            border-radius:14px;
             border-left:6px solid #1f77b4;
+            max-height:80vh;
+            overflow-y:auto;
         ">
+
         <h2>🏸 Mathi Gang Badminton Tournament</h2>
-        <h4>Official Rules & Format</h4>
+        <h3>Official Rules & Competition Format</h3>
+
+        <hr>
+
+        <h4>1. Tournament Format</h4>
         <ul>
-            <li><b>Format:</b> League + Knockout</li>
-            <li><b>League:</b> Every team plays all others</li>
-            <li><b>Team Tie:</b> 3 matches per tie, win 2 to win tie</li>
-            <li><b>Scoring:</b> Best of 3 sets, 21 points, 2‑point lead</li>
-            <li><b>Qualification:</b> Top 4 teams to semifinals</li>
-            <li><b>Knockouts:</b> Rank 1 vs 4, Rank 2 vs 3</li>
-            <li><b>Player Rule:</b> Each player plays once per opponent team</li>
-            <li><b>Conduct:</b> Fair play & sportsmanship mandatory</li>
+            <li>The tournament will be conducted in a <b>League + Knockout</b> format.</li>
+            <li><b>League Stage:</b>
+                <ul>
+                    <li>Every team will play <b>once against every other team</b>.</li>
+                    <li>Each team must form <b>three (3) fixed and unique doubles pairs</b>.</li>
+                    <li>Each player may play <b>only once against a given opponent team</b>.</li>
+                    <li>All players are expected to play an <b>equal number of matches</b>, unless injured or officially unavailable.</li>
+                </ul>
+            </li>
+            <li><b>Team Tie Structure:</b>
+                <ul>
+                    <li>Each team tie consists of <b>three doubles matches</b>.</li>
+                    <li>The team winning <b>at least two (2) out of three (3) matches</b> wins the tie.</li>
+                </ul>
+            </li>
+            <li><b>Toss Rule:</b>
+                <ul>
+                    <li>The toss winner decides which team submits their pair first.</li>
+                    <li>The opposing team then submits their pair in response.</li>
+                </ul>
+            </li>
         </ul>
-        <p style="font-size:13px;color:#555;">
-        📘 Full detailed rules are applied as per international badminton standards.
-        </p>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+
+        <hr>
+
+        <h4>2. Match & Scoring Rules</h4>
+        <ul>
+            <li>All matches are played as <b>Best of Three (3) sets</b>.</li>
+            <li>Each set is played to <b>21 points</b>.</li>
+            <li>A side must win by a <b>minimum margin of two (2) points</b>.</li>
+            <li>If the score reaches <b>20–20</b>, play continues until a two‑point lead is achieved.</li>
+            <li><b>Maximum cap (international standard):</b>
+                <ul>
+                    <li>If the score reaches <b>29–29</b>, the side scoring the <b>30th point</b> wins the set.</li>
+                </ul>
+            </li>
+        </ul>
+
+        <hr>
+
+        <h4>3. League Points & Ranking Criteria</h4>
+        <ul>
+            <li><b>Match Win (Pair Level):</b> 2 points</li>
+            <li><b>Team Tie Win:</b> Counts as one tie win in league standings</li>
+            <li>League standings are ranked using the following criteria (in order):
+                <ol>
+                    <li>Total number of <b>ties won</b></li>
+                    <li><b>Set Difference</b> = Sets Won − Sets Lost</li>
+                    <li><b>Points Difference</b> = Points For − Points Against</li>
+                    <li><b>Better points ratio</b> (Points For ÷ Points Against)</li>
+                </ol>
+            </li>
+        </ul>
+
+        <hr>
+
+        <h4>4. Qualification Rules</h4>
+        <ul>
+            <li>The <b>Top Four (4) teams</b> from the league stage qualify for the <b>Knockout Stage</b>.</li>
+            <li>Knockout seeding is as follows:
+                <ul>
+                    <li><b>Semi‑Final 1:</b> Rank 1 vs Rank 4</li>
+                    <li><b>Semi‑Final 2:</b> Rank 2 vs Rank 3</li>
+                </ul>
+            </li>
+        </ul>
+
+        <hr>
+
+        <h4>5. Knockout Stage Rules</h4>
+        <ul>
+            <li>All knockout matches are played as <b>Best of Three (3) sets</b>.</li>
+            <li>Scoring rules remain identical to league matches.</li>
+            <li>No league points apply during knockout matches.</li>
+            <li>The winning team advances; the losing team is eliminated.</li>
+        </ul>
+
+        <hr>
+
+        <h4>6. On‑Court Match Rules (International Standard)</h4>
+        <ul>
+            <li><b>Warm‑up:</b> Maximum of <b>1 minute</b> before match commencement.</li>
+            <li><b>Service Rule:</b> The winner of a set serves first in the next set.</li>
+            <li><b>Mid‑Game Interval:</b>
+                <ul>
+                    <li>A <b>60‑second interval</b> is allowed when a side reaches <b>11 points</b> in any set.</li>
+                </ul>
+            </li>
+            <li><b>Change of Ends:</b>
+                <ul>
+                    <li>Sides are changed after every completed set.</li>
+                    <li>In the <b>third set</b>, when any side reaches <b>11 points</b>, either team may request a side change.</li>
+                </ul>
+            </li>
+            <li><b>Scheduling:</b> Match schedules may be adjusted if earlier matches overrun.</li>
+        </ul>
+
+        <hr>
+
+        <h4>7. Player Substitution</h4>
+        <ul>
+            <li>Substitution is allowed <b>only</b> in the case of:
+                <ul>
+                    <li>Injury</li>
+                    <li>Medical or unavoidable unavailability</li>
+                </ul>
+            </li>
+            <li>Replacement players must be selected from a <b>pre‑approved substitute pool</b>.</li>
+            <li>No substitution is permitted for tactical or strategic advantage.</li>
+        </ul>
+
+        <hr>
+
+        <h4>8. Conduct & Sportsmanship</h4>
+        <ul>
+            <li>All players must maintain <b>fair play, discipline, and respect</b> at all times.</li>
+            <li><b>Strictly prohibited actions include:</b>
+                <ul>
+                    <li>Hitting rackets, nets, or equipment in anger</li>
+                    <li>Arguing with umpires or tournament officials</li>
+                </ul>
+            </li>
+            <li><b>Supporters and spectators:</b>
+                <ul>
+                    <li>Must not coach players during rallies</li>
+                    <li>Must not interfere with officiating decisions</li>
+                </ul>
+            </li>
+            <li>Repeated misconduct may result in:
+                <ul>
+                    <li>Point penalties</li>
+                    <li>Match forfeiture</li>
+                    <li>Tournament disqualification (at organizer’s discretion)</li>
+                </ul>
+            </li>
+        </ul>
+
+        <hr>
+
+        <h4>9. Final Authority</h4>
+        <ul>
+            <li>The tournament organizers’ decisions are <b>final and binding</b>.</li>
+            <li>Rules may be refined if required to ensure fairness, safety, or smooth conduct of the tournament.</li>
+        </ul>
+
 
 # -------------------------------------------------
 # TEAMS
