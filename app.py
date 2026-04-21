@@ -6,7 +6,7 @@ from collections import defaultdict, deque
 RULES_HTML = """
 <div style="background-color:#f8f9fa;padding:25px;border-radius:14px;
 border-left:6px solid #1f77b4;max-height:80vh;overflow-y:auto;">
-<h2>🏸 Mathi Gang Badminton Tournament</h2>
+<h2>🏸House League Badminton Tournament</h2>
 <h3>Official Rules & Competition Format</h3>
 <hr>
 
