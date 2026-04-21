@@ -1,46 +1,55 @@
 import streamlit as st
 import json
 import pandas as pd
-from calculations import analyze_results
+from collections import defaultdict, deque
 
-st.set_page_config("🏸 Badminton Tournament", layout="wide")
+st.set_page_config(page_title="🏸 Badminton Tournament", layout="wide")
 
+# ---------------- LOAD DATA ----------------
 fixtures = json.load(open("data/fixtures.json"))
 results = json.load(open("data/results.json"))
+players_master = json.load(open("data/players.json"))
 
-teams = sorted(set([f["team_a"] for f in fixtures] + [f["team_b"] for f in fixtures]))
+teams = sorted(set(
+    [f["team_a"] for f in fixtures] +
+    [f["team_b"] for f in fixtures]
+))
 
-st.title("🏸 Badminton Tournament Dashboard")
-st.caption("International Standard • Live Statistics")
+# ---------------- ADMIN AUTH ----------------
+if "is_admin" not in st.session_state:
+    st.session_state.is_admin = False
 
-menu = st.radio(
-    "Choose Section",
-    ["Fixtures", "Enter Results", "Team Standings", "Player Standings", "Knockout"],
-    horizontal=True
-)
+def admin_login():
+    with st.form("login"):
+        pwd = st.text_input("Admin Password", type="password")
+        if st.form_submit_button("Login"):
+            if pwd == st.secrets["ADMIN_PASSWORD"]:
+                st.session_state.is_admin = True
+                st.success("Logged in as admin")
+                st.rerun()
+            else:
+                st.error("Wrong password")
 
-team_stats, player_stats = analyze_results(results, fixtures)
+# ---------------- CALCULATION ENGINE ----------------
+def calculate_stats(results):
+    team_stats = defaultdict(lambda: {
+        "Played": 0, "Won": 0, "Lost": 0, "Points": 0,
+        "Sets Won": 0, "Sets Lost": 0,
+        "Points Won": 0, "Points Lost": 0
+    })
 
-# ---------------- FIXTURES ----------------
-if menu == "Fixtures":
-    for f in fixtures:
-        st.markdown(f"**{f['team_a']} vs {f['team_b']}**")
+    player_stats = defaultdict(lambda: {
+        "Team": "", "Played": 0, "Won": 0, "Points": 0,
+        "Sets Won": 0, "Sets Lost": 0,
+        "Points Won": 0, "Points Lost": 0,
+        "Form": deque(maxlen=5)
+    })
 
-# ---------------- TEAM STANDINGS ----------------
-elif menu == "Team Standings":
-    df = pd.DataFrame.from_dict(team_stats, orient="index")
-    df["Set Diff"] = df["Sets Won"] - df["Sets Lost"]
-    df["Point Diff"] = df["Points Won"] - df["Points Lost"]
-    df = df.sort_values(by=["Points", "Set Diff", "Point Diff"], ascending=False)
-    st.dataframe(df, use_container_width=True)
+    for tie in results:
+        team_a, team_b = tie["team_a"], tie["team_b"]
+        fixture = next(f for f in fixtures if f["tie_id"] == tie["tie_id"])
 
-# ---------------- PLAYER STANDINGS ----------------
-elif menu == "Player Standings":
-    dfp = pd.DataFrame.from_dict(player_stats, orient="index")
-    dfp["Recent Form"] = dfp["Form"].apply(lambda x: "".join(x))
-    dfp = dfp.sort_values(by=["Points", "Won"], ascending=False)
-    st.dataframe(dfp[["Team", "Points", "Played", "Recent Form"]], use_container_width=True)
+        a_match_wins = b_match_wins = 0
 
-# ---------------- KNOCKOUT ----------------
-elif menu == "Knockout":
-    st.info("Semi‑finals & Finals generated automatically once league completes.")
+        for i, match in enumerate(tie["matches"]):
+            pair_a = [p.strip() for p in fixture["matches"][i][0].split("/")]
