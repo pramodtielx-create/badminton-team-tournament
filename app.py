@@ -6,7 +6,8 @@ from collections import defaultdict, deque
 RULES_HTML = """
 <div style="background-color:#f8f9fa;padding:25px;border-radius:14px;
 border-left:6px solid #1f77b4;max-height:80vh;overflow-y:auto;">
-<h2>🏸House League Badminton Tournament</h2>
+
+<h2>🏸 House League Badminton Tournament</h2>
 <h3>Official Rules & Competition Format</h3>
 <hr>
 
@@ -14,44 +15,103 @@ border-left:6px solid #1f77b4;max-height:80vh;overflow-y:auto;">
 <ul>
 <li>League + Knockout format.</li>
 <li>Each team plays once against every other team.</li>
-<li>Each team forms 3 fixed doubles pairs.</li>
-<li>Each player plays only once against an opponent team.</li>
-<li>3 matches per tie; winning 2 wins the tie.</li>
-<li>Toss decides which team submits their pair first.</li>
+<li>Each team forms <b>3 fixed doubles pairs</b> for the entire league stage.</li>
+<li>Each player plays <b>only once against an opponent team</b>.</li>
+<li>Each tie consists of <b>3 matches</b>; the team winning <b>2 matches</b> wins the tie.</li>
+<li>Toss decides which team submits their pair first; the opposing team responds.</li>
 </ul>
 
-<h4>2. Match & Scoring Rules</h4>
+<h4>2. Match & Scoring Rules (BWF Standard)</h4>
 <ul>
-<li>Best of 3 sets.</li>
-<li>Each set to 21 points.</li>
-<li>Win by 2 points.</li>
-<li>At 29–29, first to 30 wins.</li>
+<li>All matches are played as <b>Best of 3 sets</b>.</li>
+<li>Each set is played to <b>21 points</b>.</li>
+<li>A side must win by a <b>minimum 2‑point margin</b>.</li>
+<li>If the score reaches <b>20–20</b>, play continues until a 2‑point lead is achieved.</li>
+<li>If the score reaches <b>29–29</b>, the side scoring the <b>30th point wins the set</b>.</li>
 </ul>
 
-<h4>3. League Ranking</h4>
+<h4>3. Service Rules (BWF Standard)</h4>
+<ul>
+<li>Service is delivered diagonally to the opponent’s service court.</li>
+<li>At the moment of service:
+  <ul>
+    <li>The shuttle must be hit below the server’s waist.</li>
+    <li>The racket shaft must point downward.</li>
+    <li>Both feet of server and receiver must be stationary and within service courts.</li>
+  </ul>
+</li>
+<li>Only the serving side can score points.</li>
+</ul>
+
+<h4>4. Intervals & Change of Ends</h4>
+<ul>
+<li>A <b>60‑second interval</b> is allowed when the leading score reaches <b>11 points</b> in each set.</li>
+<li>Players change ends:
+  <ul>
+    <li>At the end of each set.</li>
+    <li>In the <b>third set</b>, when one side reaches <b>11 points</b>.</li>
+  </ul>
+</li>
+</ul>
+
+<h4>5. League Ranking & Tie‑Break Criteria</h4>
 <ol>
-<li>Ties Won</li>
-<li>Set Difference</li>
-<li>Points Difference</li>
-<li>Points Ratio</li>
+<li>Total <b>Ties Won</b></li>
+<li><b>Set Difference</b> (Sets Won − Sets Lost)</li>
+<li><b>Points Difference</b> (Points For − Points Against)</li>
+<li><b>Points Ratio</b> (Points For ÷ Points Against)</li>
+<li>If still tied, decision by tournament committee</li>
 </ol>
 
-<h4>4. Qualification</h4>
+<h4>6. Qualification</h4>
 <ul>
-<li>Top 2 teams qualify for Finals.</li>
-<li>Bottom 2 play for 3rd place.</li>
+<li>Top <b>2 teams</b> qualify directly for the <b>Final</b>.</li>
+<li>Bottom <b>2 teams</b> play for <b>3rd and 4th place</b>.</li>
 </ul>
 
-<h4>5. Conduct</h4>
+<h4>7. Player Substitution</h4>
 <ul>
-<li>No equipment abuse.</li>
-<li>No arguing with officials.</li>
-<li>No coaching during rallies.</li>
+<li>Substitution is allowed <b>only</b> in case of:
+  <ul>
+    <li>Injury</li>
+    <li>Medical or unavoidable absence</li>
+  </ul>
+</li>
+<li>Substitutes must come from a <b>pre‑approved pool</b>.</li>
+<li>No substitution is allowed for tactical or strategic reasons.</li>
+</ul>
+
+<h4>8. Conduct & Code of Behaviour (BWF Aligned)</h4>
+<ul>
+<li>Players must display <b>fair play and sportsmanship</b> at all times.</li>
+<li>The following are strictly prohibited:
+  <ul>
+    <li>Hitting rackets, nets, or shuttlecocks in anger</li>
+    <li>Abusive language or gestures</li>
+    <li>Arguing with umpires or organizers</li>
+  </ul>
+</li>
+<li>Coaching during rallies is <b>not permitted</b>.</li>
+<li>Spectators must not interfere with play or officiating.</li>
+</ul>
+
+<h4>9. Match Delays & Scheduling</h4>
+<ul>
+<li>Matches should begin at scheduled time.</li>
+<li>Delays due to earlier matches overrunning may occur.</li>
+<li>Organizers reserve the right to adjust schedules if required.</li>
+</ul>
+
+<h4>10. Final Authority</h4>
+<ul>
+<li>The tournament committee’s decision is <b>final and binding</b>.</li>
+<li>Rules may be amended to ensure fairness, safety, or smooth conduct.</li>
 </ul>
 
 <p style="font-size:13px;color:#555;">
-✅ Rules aligned with international badminton standards.
+✅ These rules follow International Badminton Federation (BWF) Laws of Badminton and are adapted for house‑league competition.
 </p>
+
 </div>
 """
 # =================================================
