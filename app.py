@@ -94,6 +94,12 @@ with tabs[1]:
 
     st.dataframe(df, use_container_width=True)
 
-    st.subheader("✅ Qualified Teams (Top 2)")
-    for t in df.head(2).index:
-        st.success(t)
+  st.subheader("✅ Qualified Teams (Top 2)")
+
+if df["Won"].max() == 0:
+    st.info("No teams have qualified yet. Enter match results to determine qualifiers.")
+else:
+    qualified = df[df["Won"] > 0].head(2)
+    for team in qualified.index:
+        st.success(team)
+
