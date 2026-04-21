@@ -291,3 +291,139 @@ elif menu == "Enter Results":
 
             st.success("✅ Results saved (previous matches preserved)")
             st.rerun()
+#========================================================================
+elif menu == "Team Standings":
+    st.subheader("📊 Team Standings")
+
+    results = load_json("data/results.json", [])
+
+    if not results:
+        st.warning("No results entered yet.")
+    else:
+        table = defaultdict(lambda: {
+            "Played": 0,
+            "Won": 0,
+            "Points": 0
+        })
+
+        for r in results:
+            ta, tb = r["team_a"], r["team_b"]
+            table[ta]["Played"] += 1
+            table[tb]["Played"] += 1
+
+            a_match_wins = 0
+            b_match_wins = 0
+
+            for m in r["matches"]:
+                if not m or "sets" not in m or not m["sets"]:
+                    continue  # ✅ skip empty match
+
+                a_sets = 0
+                b_sets = 0
+
+                for a, b in m["sets"]:
+                    if a > b:
+                        a_sets += 1
+                    else:
+                        b_sets += 1
+
+                if a_sets > b_sets:
+                    a_match_wins += 1
+                else:
+                    b_match_wins += 1
+
+            if a_match_wins >= 2:
+                table[ta]["Won"] += 1
+                table[ta]["Points"] += 2
+            elif b_match_wins >= 2:
+                table[tb]["Won"] += 1
+                table[tb]["Points"] += 2
+
+        df = pd.DataFrame.from_dict(table, orient="index")
+        df = df.sort_values(by=["Points", "Won"], ascending=False)
+#=========================================================================
+        elif menu == "Player Standings":
+    st.subheader("👤 Individual Player Standings")
+
+    results = load_json("data/results.json", [])
+
+    # 1️⃣ Initialize all players with 0
+    stats = defaultdict(lambda: {
+        "Team": "",
+        "Played": 0,
+        "Won": 0,
+        "Points": 0,
+        "Form": deque(maxlen=5)
+    })
+
+    for team, players in teams_data.items():
+        for p in players:
+            stats[p]["Team"] = team
+
+    # 2️⃣ Apply results
+    for r in results:
+        fixture = next(
+            (f for f in fixtures if f["tie_id"] == r["tie_id"]),
+            None
+        )
+        if not fixture:
+            continue
+
+        for i, m in enumerate(r["matches"]):
+            if not m or "sets" not in m or not m["sets"]:
+                continue  # ✅ skip empty match
+
+            pair_a = fixture["matches"][i][0].split("/")
+            pair_b = fixture["matches"][i][1].split("/")
+
+            a_sets = 0
+            b_sets = 0
+
+            for a, b in m["sets"]:
+                if a > b:
+                    a_sets += 1
+                else:
+                    b_sets += 1
+
+            a_win = a_sets > b_sets
+
+            for p in pair_a:
+                p = p.strip()
+                stats[p]["Played"] += 1
+                stats[p]["Form"].append("✅" if a_win else "❌")
+                if a_win:
+                    stats[p]["Won"] += 1
+                    stats[p]["Points"] += 2
+
+            for p in pair_b:
+                p = p.strip()
+                stats[p]["Played"] += 1
+                stats[p]["Form"].append("✅" if not a_win else "❌")
+                if not a_win:
+                    stats[p]["Won"] += 1
+                    stats[p]["Points"] += 2
+
+    dfp = pd.DataFrame.from_dict(stats, orient="index")
+    dfp["Recent Form"] = dfp["Form"].apply(lambda x: " ".join(list(x)))
+
+    dfp = dfp.sort_values(
+        by=["Points", "Won", "Played"],
+        ascending=[False, False, True]
+    )
+
+    st.dataframe(
+        dfp[["Team", "Played", "Won", "Points", "Recent Form"]],
+        width="stretch"
+    )
+
+    if dfp["Points"].max() > 0:
+        pot = dfp.index[0]
+        st.success(f"🥇 Player of the Tournament: **{pot}** ({dfp.loc[pot,'Team']})")
+    else:
+        st.info("Player of the Tournament will be decided after matches are played.")
+
+
+
+        st.dataframe(df, width="stretch")
+        #============================================================
+        
