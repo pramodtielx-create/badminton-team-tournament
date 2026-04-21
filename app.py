@@ -82,10 +82,6 @@ menu = st.radio(
 # HOME
 # =================================================
 if menu == "Home":
-   
-# -------------------------------------------------
-# FULL RULES (SAFE VARIABLE)
-# -------------------------------------------------
 RULES_HTML = """
 <div style="background-color:#f8f9fa;padding:25px;border-radius:14px;border-left:6px solid #1f77b4;max-height:80vh;overflow-y:auto;">
 <h2>🏸 Mathi Gang Badminton Tournament</h2>
