@@ -251,26 +251,30 @@ elif menu == "Enter Results":
             match_results.append({"sets": sets})
 
         # ✅ SAVE BUTTON (CRITICAL)
-        if st.button("✅ Save Results"):
-    # Find existing tie (if any)
+       if st.button("✅ Save Results"):
+    # Find existing tie (if any), else create empty placeholder
     tie_result = next(
-        (r for r in results if r["tie_id"] == tie["tie_id"]),
+        (
+            r for r in results
+            if r["tie_id"] == tie["tie_id"]
+        ),
         {
             "tie_id": tie["tie_id"],
             "team_a": tie["team_a"],
             "team_b": tie["team_b"],
-            "matches": [{}, {}, {}]   # placeholders for 3 matches
+            "matches": [{}, {}, {}]  # placeholders for 3 matches
         }
     )
 
-    # Update only matches that have data
+    # Update only matches that have data (preserve previous ones)
     for idx, match in enumerate(match_results):
-        if match["sets"]:   # only overwrite if sets entered
+        if match["sets"]:
             tie_result["matches"][idx] = match
 
-    # Remove old tie and save updated one
+    # Remove old tie (if exists) and save updated one
     updated_results = [
-        r for r in results if r["tie_id"] != tie["tie_id"]
+        r for r in results
+        if r["tie_id"] != tie["tie_id"]
     ]
     updated_results.append(tie_result)
 
@@ -278,4 +282,3 @@ elif menu == "Enter Results":
 
     st.success("✅ Results saved (previous matches preserved)")
     st.rerun()
-
