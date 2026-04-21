@@ -208,33 +208,62 @@ elif menu == "Results":
 # =================================================
 # ENTER RESULTS (ADMIN ONLY)
 # =================================================
-elif menu == "Enter Results":
-    if not st.session_state.is_admin:
-        st.warning("🔒 Admin access required")
-    else:
-        tie = st.selectbox(
-            "Select Tie",
+elif menu == "Enter Results":elif            "Select Tie",
             fixtures,
             format_func=lambda x: f"Tie {x['tie_id']} — {x['team_a']} vs {x['team_b']}"
         )
 
         match_results = []
+
         for m in range(3):
-            st.markdown(f"### Match {m+1}")
+            st.markdown(f"### Match {m + 1}")
             sets = []
+
             for s in range(3):
                 c1, c2 = st.columns(2)
+
                 with c1:
                     a = st.number_input(
-                        f"{tie['team_a']}",
+                        f"{tie['team_a']} (Set {s + 1})",
                         0, 30,
                         key=f"a_{tie['tie_id']}_{m}_{s}"
                     )
+
                 with c2:
                     b = st.number_input(
-                        f"{tie['team_b']}",
+                        f"{tie['team_b']} (Set {s + 1})",
                         0, 30,
                         key=f"b_{tie['tie_id']}_{m}_{s}"
                     )
+
+                if a > 0 or b > 0:
+                    sets.append([a, b])
+
+            match_results.append({"sets": sets})
+
+        # ✅ SAVE BUTTON (THIS WAS MISSING)
+        if st.button("✅ Save Results"):
+            updated_results = [
+                r for r in results if r["tie_id"] != tie["tie_id"]
+            ]
+
+            updated_results.append({
+                "tie_id": tie["tie_id"],
+                "team_a": tie["team_a"],
+                "team_b": tie["team_b"],
+                "matches": match_results
+            })
+
+            save_json("data/results.json", updated_results)
+
+            st.success("✅ Results saved successfully")
+            st.rerun()   # 🔥 forces reload so Results/Standings update
+    st.subheader("📝 Enter Match Results")
+
+    if not st.session_state.is_admin:
+        st.warning("🔒 Admin access required")
+    else:
+        tie = st.selectbox(
+
                 if a or b:
                     sets.append([a, b])
