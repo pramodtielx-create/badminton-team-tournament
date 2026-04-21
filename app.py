@@ -423,6 +423,3 @@ elif menu == "Player Standings":
         st.success(f"🥇 Player of the Tournament: **{pot}** ({dfp.loc[pot,'Team']})")
     else:
         st.info("Player of the Tournament will be decided after matches are played.")
-``
-
-
