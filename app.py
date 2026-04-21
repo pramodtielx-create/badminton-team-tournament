@@ -186,28 +186,6 @@ elif menu == "Fixtures":
 # =================================================
 # RESULTS (PUBLIC)
 # =================================================
-elif menu == "Results":
-    st.subheader("📊 Match Results")
-    if not results:
-        st.warning("No results entered yet.")
-    else:
-        for r in results:
-            c1, c2, c3 = st.columns([1,4,1])
-            with c1:
-                show_logo(r["team_a"])
-            with c2:
-                st.subheader(f"{r['team_a']} VS {r['team_b']}")
-            with c3:
-                show_logo(r["team_b"])
-
-            for i, m in enumerate(r["matches"], 1):
-                score = " | ".join([f"{s[0]}-{s[1]}" for s in m["sets"]])
-                st.write(f"Match {i}: {score}")
-            st.divider()
-
-# =================================================
-# ENTER RESULTS (ADMIN ONLY)
-# =================================================
 elif menu == "Enter Results":
     st.subheader("📝 Enter Match Results")
 
@@ -250,35 +228,31 @@ elif menu == "Enter Results":
 
             match_results.append({"sets": sets})
 
-        # ✅ SAVE BUTTON (CRITICAL)
-       if st.button("✅ Save Results"):
-    # Find existing tie (if any), else create empty placeholder
-    tie_result = next(
-        (
-            r for r in results
-            if r["tie_id"] == tie["tie_id"]
-        ),
-        {
-            "tie_id": tie["tie_id"],
-            "team_a": tie["team_a"],
-            "team_b": tie["team_b"],
-            "matches": [{}, {}, {}]  # placeholders for 3 matches
-        }
-    )
+        if st.button("✅ Save Results"):
+            tie_result = next(
+                (
+                    r for r in results
+                    if r["tie_id"] == tie["tie_id"]
+                ),
+                {
+                    "tie_id": tie["tie_id"],
+                    "team_a": tie["team_a"],
+                    "team_b": tie["team_b"],
+                    "matches": [{}, {}, {}]
+                }
+            )
 
-    # Update only matches that have data (preserve previous ones)
-    for idx, match in enumerate(match_results):
-        if match["sets"]:
-            tie_result["matches"][idx] = match
+            for idx, match in enumerate(match_results):
+                if match["sets"]:
+                    tie_result["matches"][idx] = match
 
-    # Remove old tie (if exists) and save updated one
-    updated_results = [
-        r for r in results
-        if r["tie_id"] != tie["tie_id"]
-    ]
-    updated_results.append(tie_result)
+            updated_results = [
+                r for r in results
+                if r["tie_id"] != tie["tie_id"]
+            ]
+            updated_results.append(tie_result)
 
-    save_json("data/results.json", updated_results)
+            save_json("data/results.json", updated_results)
 
-    st.success("✅ Results saved (previous matches preserved)")
-    st.rerun()
+            st.success("✅ Results saved (previous matches preserved)")
+            st.rerun()
