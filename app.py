@@ -257,7 +257,14 @@ elif menu == "Team Standings":
 elif menu == "Player Standings":
     st.subheader("👤 Individual Player Standings")
 
-    stats = defaultdict(lambda: {"Team":"","Played":0,"Won":0,"Points":0,"Form":deque(maxlen=5)})
+    stats = defaultdict(lambda: {
+    "Team": "",
+    "Played": 0,
+    "Won": 0,
+    "Points": 0,
+    "Form": deque(maxlen=5)
+})
+
 
     for r in results:
         fixture = next(f for f in fixtures if f["tie_id"] == r["tie_id"])
