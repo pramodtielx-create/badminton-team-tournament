@@ -110,25 +110,47 @@ elif menu == "Teams":
 # FIXTURES
 # -------------------------------------------------
 elif menu == "Fixtures":
-    st.subheader("📅 Fixtures")
+    st for tie in fixtures:    st.subheader("📅 Fixtures")
+        # ---- Header Row ----
+        col_logo_a, col_team_a, col_vs, col_team_b, col_logo_b = st.columns(
+            [1, 3, 1, 3, 1]
+        )
 
-    for tie in fixtures:
-        col1, col2, col3 = st.columns([1, 3, 3])
+        with col_logo_a:
+            show_logo(tie["team_a"], width=60)
 
-        with col1:
-            show_logo(tie["team_a"], 50)
-            show_logo(tie["team_b"], 50)
+        with col_team_a:
+            st.markdown(
+                f"<h3 style='text-align: right;'>{tie['team_a']}</h3>",
+                unsafe_allow_html=True
+            )
 
-        with col2:
-            st.markdown(f"### {tie['team_a']}")
+        with col_vs:
+            st.markdown(
+                "<h3 style='text-align: center;'>VS</h3>",
+                unsafe_allow_html=True
+            )
 
-        with col3:
-            st.markdown(f"### {tie['team_b']}")
+        with col_team_b:
+            st.markdown(
+                f"<h3 style='text-align: left;'>{tie['team_b']}</h3>",
+                unsafe_allow_html=True
+            )
 
+        with col_logo_b:
+            show_logo(tie["team_b"], width=60)
+
+        # ---- Matches ----
+        st.markdown("---")
         for i, match in enumerate(tie["matches"], start=1):
-            st.write(f"Match {i}: {match[0]} vs {match[1]}")
+            st.markdown(
+                f"**Match {i}:** {match[0]}  vs  {match[1]}"
+            )
 
         st.divider()
+``
+
+
 
 # -------------------------------------------------
 # ENTER RESULTS
