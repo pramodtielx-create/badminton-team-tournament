@@ -3,6 +3,119 @@ import json
 import pandas as pd
 import os
 
+RULES_HTML = """
+<div style="
+    background-color:#f8f9fa;
+    padding:25px;
+    border-radius:14px;
+    border-left:6px solid #1f77b4;
+    max-height:80vh;
+    overflow-y:auto;
+">
+
+<h2>🏸 Mathi Gang Badminton Tournament</h2>
+<h3>Official Rules & Competition Format</h3>
+
+<hr>
+
+<h4>1. Tournament Format</h4>
+<ul>
+<li>The tournament will be conducted in a <b>League + Knockout</b> format.</li>
+<li><b>League Stage:</b>
+<ul>
+<li>Every team plays <b>once against every other team</b>.</li>
+<li>Each team forms <b>three (3) fixed doubles pairs</b>.</li>
+<li>Each player may play <b>only once against a given opponent team</b>.</li>
+<li>Equal match participation unless injured or unavailable.</li>
+</ul>
+</li>
+<li><b>Team Tie:</b>
+<ul>
+<li>Each tie consists of <b>3 matches</b>.</li>
+<li>Winning <b>2 of 3</b> wins the tie.</li>
+</ul>
+</li>
+<li><b>Toss:</b> Toss winner submits pair first.</li>
+</ul>
+
+<hr>
+
+<h4>2. Match & Scoring Rules</h4>
+<ul>
+<li>Best of <b>3 sets</b>.</li>
+<li>Each set to <b>21 points</b>.</li>
+<li>Must win by <b>2 clear points</b>.</li>
+<li>At <b>29–29</b>, first to <b>30</b> wins.</li>
+</ul>
+
+<hr>
+
+<h4>3. League Ranking Criteria</h4>
+<ol>
+<li>Ties Won</li>
+<li>Set Difference (Won − Lost)</li>
+<li>Points Difference (For − Against)</li>
+<li>Better points ratio</li>
+</ol>
+
+<hr>
+
+<h4>4. Qualification</h4>
+<ul>
+<li><b>Top 4 teams</b> qualify for semifinals.</li>
+<li>SF1: Rank 1 vs Rank 4</li>
+<li>SF2: Rank 2 vs Rank 3</li>
+</ul>
+
+<hr>
+
+<h4>5. Knockout Rules</h4>
+<ul>
+<li>Best of 3 sets</li>
+<li>Same scoring rules apply</li>
+</ul>
+
+<hr>
+
+<h4>6. On‑Court Rules (International Standard)</h4>
+<ul>
+<li>1‑minute warm‑up</li>
+<li>60‑second interval at 11 points</li>
+<li>Switch sides after each set</li>
+<li>In 3rd set, side change at 11 points on request</li>
+</ul>
+
+<hr>
+
+<h4>7. Substitution</h4>
+<ul>
+<li>Allowed only for injury or unavailability</li>
+<li>From approved substitute pool</li>
+</ul>
+
+<hr>
+
+<h4>8. Conduct</h4>
+<ul>
+<li>No equipment abuse</li>
+<li>No arguing with officials</li>
+<li>No coaching during rallies</li>
+</ul>
+
+<hr>
+
+<h4>9. Final Authority</h4>
+<ul>
+<li>Organizers’ decisions are final</li>
+</ul>
+
+<p style="font-size:13px;color:#555;">
+✅ Rules aligned with international badminton standards.
+</p>
+
+</div>
+"""
+
 # -------------------------------------------------
 # PAGE CONFIG
 # -------------------------------------------------
