@@ -1,4 +1,5 @@
 import streamlit as st
+import json
 
 st.set_page_config(
     page_title="🏸 Badminton Tournament",
@@ -13,16 +14,23 @@ menu = st.radio(
     horizontal=True
 )
 
+# -------- LOAD FIXTURES SAFELY --------
+@st.cache_data
+def load_fixtures():
+    with open("data/fixtures.json", "r") as f:
+        return json.load(f)
+
+fixtures = load_fixtures()
+
+# -------- PAGES --------
 if menu == "Home":
     st.success("✅ App is running correctly.")
     st.write("Use the menu above to navigate.")
 
 elif menu == "Fixtures":
-    st.info("Fixtures page – coming next")
+    st.subheader("📅 Fixtures")
 
-elif menu == "Standings":
-    st.info("Standings page – coming next")
-
-elif menu == "Admin":
-    st.info("Admin login – coming next")
-
+    for tie in fixtures:
+        st.markdown(
+            f"""
+            ### Tie {tie['tie_id']}
