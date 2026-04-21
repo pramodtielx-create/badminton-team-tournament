@@ -10,6 +10,59 @@ from collections import defaultdict, deque
 st.set_page_config(page_title="🏸 Badminton Tournament", layout="wide")
 st.title("🏸 Badminton Tournament")
 
+
+# -------------------------------------------------
+# FULL RULES (SAFE VARIABLE)
+# -------------------------------------------------
+RULES_HTML = """
+<div style="background-color:#f8f9fa;padding:25px;border-radius:14px;border-left:6px solid #1f77b4;max-height:80vh;overflow-y:auto;">
+<h2>🏸 Mathi Gang Badminton Tournament</h2>
+<h3>Official Rules & Competition Format</h3>
+<hr>
+
+<h4>1. Tournament Format</h4>
+<ul>
+<li>League + Knockout format.</li>
+<li>Each team plays once against every other team.</li>
+<li>Each team forms 3 fixed doubles pairs.</li>
+<li>Each player plays only once against an opponent team.</li>
+<li>3 matches per tie; winning 2 wins the tie.</li>
+<li>Toss decides which team submits their pair first.</li>
+</ul>
+
+<h4>2. Match & Scoring Rules</h4>
+<ul>
+<li>Best of 3 sets.</li>
+<li>Each set to 21 points.</li>
+<li>Win by 2 points.</li>
+<li>At 29–29, first to 30 wins.</li>
+</ul>
+
+<h4>3. League Ranking</h4>
+<ol>
+<li>Ties Won</li>
+<li>Set Difference</li>
+<li>Points Difference</li>
+<li>Points Ratio</li>
+</ol>
+
+<h4>4. Qualification</h4>
+<ul>
+<li>Top 2 teams qualify for Finals.</li>
+<li>Bottom 2 will play for 3rd and 4th</li>
+</ul>
+
+<h4>5. Conduct</h4>
+<ul>
+<li>No equipment abuse.</li>
+<li>No arguing with officials.</li>
+<li>No coaching during rallies.</li>
+</ul>
+
+<p style="font-size:13px;color:#555;">✅ Rules aligned with international badminton standards.</p>
+</div>
+"""
+
 # =================================================
 # ADMIN SESSION
 # =================================================
