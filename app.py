@@ -252,18 +252,30 @@ elif menu == "Enter Results":
 
         # ✅ SAVE BUTTON (CRITICAL)
         if st.button("✅ Save Results"):
-            updated_results = [
-                r for r in results if r["tie_id"] != tie["tie_id"]
-            ]
+    # Find existing tie (if any)
+    tie_result = next(
+        (r for r in results if r["tie_id"] == tie["tie_id"]),
+        {
+            "tie_id": tie["tie_id"],
+            "team_a": tie["team_a"],
+            "team_b": tie["team_b"],
+            "matches": [{}, {}, {}]   # placeholders for 3 matches
+        }
+    )
 
-            updated_results.append({
-                "tie_id": tie["tie_id"],
-                "team_a": tie["team_a"],
-                "team_b": tie["team_b"],
-                "matches": match_results
-            })
+    # Update only matches that have data
+    for idx, match in enumerate(match_results):
+        if match["sets"]:   # only overwrite if sets entered
+            tie_result["matches"][idx] = match
 
-            save_json("data/results.json", updated_results)
+    # Remove old tie and save updated one
+    updated_results = [
+        r for r in results if r["tie_id"] != tie["tie_id"]
+    ]
+    updated_results.append(tie_result)
 
-            st.success("✅ Results saved successfully")
-            st.rerun()
+    save_json("data/results.json", updated_results)
+
+    st.success("✅ Results saved (previous matches preserved)")
+    st.rerun()
+
