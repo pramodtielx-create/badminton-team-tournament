@@ -1,12 +1,20 @@
 import streamlit as st
 import json
+import pandas as pd
 
+# -------------------------------------------------
+# PAGE CONFIG
+# -------------------------------------------------
 st.set_page_config(
     page_title="🏸 Badminton Tournament",
     layout="wide"
 )
 
-# ---------------- LOAD DATA ----------------
+st.title("🏸 Badminton Tournament")
+
+# -------------------------------------------------
+# DATA LOADERS
+# -------------------------------------------------
 @st.cache_data
 def load_fixtures():
     with open("data/fixtures.json", "r") as f:
@@ -26,21 +34,25 @@ def save_results(data):
 fixtures = load_fixtures()
 results = load_results()
 
-# ---------------- UI ----------------
-st.title("🏸 Badminton Tournament")
-
+# -------------------------------------------------
+# MENU
+# -------------------------------------------------
 menu = st.radio(
     "Navigate",
     ["Home", "Fixtures", "Enter Results", "Standings"],
     horizontal=True
 )
 
-# ---------------- HOME ----------------
+# -------------------------------------------------
+# HOME
+# -------------------------------------------------
 if menu == "Home":
-    st.success("✅ Tournament system is running")
-    st.write("Use the menu to view fixtures or enter match results.")
+    st.success("✅ Tournament system is running correctly")
+    st.write("Use the menu above to view fixtures, enter results, and see standings.")
 
-# ---------------- FIXTURES ----------------
+# -------------------------------------------------
+# FIXTURES
+# -------------------------------------------------
 elif menu == "Fixtures":
     st.subheader("📅 Fixtures")
 
@@ -54,34 +66,40 @@ elif menu == "Fixtures":
         for i, match in enumerate(tie["matches"], start=1):
             st.write(f"Match {i}: {match[0]}  vs  {match[1]}")
 
-# ---------------- ENTER RESULTS ----------------
+# -------------------------------------------------
+# ENTER RESULTS
+# -------------------------------------------------
 elif menu == "Enter Results":
-    st.subheader("📝 Enter Match Results")
+    st.subheader("📝 Enter Match Results (Best of 3 Sets)")
 
     tie = st.selectbox(
         "Select Tie",
         fixtures,
-        format_func=lambda x: f" Tie {x['tie_id']} — {x['team_a']} vs {x['team_b']}"
+        format_func=lambda x: f"Tie {x['tie_id']} — {x['team_a']} vs {x['team_b']}"
     )
 
     match_results = []
 
     for m in range(3):
-        st.markdown(f"### Match {m+1}")
+        st.markdown(f"### Match {m + 1}")
         sets = []
 
         for s in range(3):
             col1, col2 = st.columns(2)
+
             with col1:
                 a = st.number_input(
-                    f"Set {s+1} – {tie['team_a']}",
-                    min_value=0, max_value=30,
+                    f"Set {s + 1} – {tie['team_a']}",
+                    min_value=0,
+                    max_value=30,
                     key=f"a_{tie['tie_id']}_{m}_{s}"
                 )
+
             with col2:
                 b = st.number_input(
-                    f"Set {s+1} – {tie['team_b']}",
-                    min_value=0, max_value=30,
+                    f"Set {s + 1} – {tie['team_b']}",
+                    min_value=0,
+                    max_value=30,
                     key=f"b_{tie['tie_id']}_{m}_{s}"
                 )
 
@@ -101,6 +119,76 @@ elif menu == "Enter Results":
         save_results(results)
         st.success("✅ Results saved successfully")
 
-# ---------------- STANDINGS (NEXT) ----------------
+# -------------------------------------------------
+# STANDINGS
+# -------------------------------------------------
 elif menu == "Standings":
-    st.info("Standings will be calculated next")
+    st.subheader("📊 Team Standings")
+
+    # Initialize teams
+    teams = set()
+    for t in fixtures:
+        teams.add(t["team_a"])
+        teams.add(t["team_b"])
+
+    standings = {
+        team: {
+            "Played": 0,
+            "Won": 0,
+            "Lost": 0,
+            "Points": 0,
+            "Sets Won": 0,
+            "Sets Lost": 0,
+            "Points Won": 0,
+            "Points Lost": 0
+        }
+        for team in teams
+    }
+
+    # Calculate standings from results
+    for r in results:
+        team_a = r["team_a"]
+        team_b = r["team_b"]
+
+        standings[team_a]["Played"] += 1
+        standings[team_b]["Played"] += 1
+
+        team_a_match_wins = 0
+        team_b_match_wins = 0
+
+        for match in r["matches"]:
+            a_sets = 0
+            b_sets = 0
+
+            for s in match["sets"]:
+                a_pts, b_pts = s
+
+                standings[team_a]["Points Won"] += a_pts
+                standings[team_a]["Points Lost"] += b_pts
+                standings[team_b]["Points Won"] += b_pts
+                standings[team_b]["Points Lost"] += a_pts
+
+                if a_pts > b_pts:
+                    a_sets += 1
+                    standings[team_a]["Sets Won"] += 1
+                    standings[team_b]["Sets Lost"] += 1
+                else:
+                    b_sets += 1
+                    standings[team_b]["Sets Won"] += 1
+                    standings[team_a]["Sets Lost"] += 1
+
+            if a_sets > b_sets:
+                team_a_match_wins += 1
+            else:
+                team_b_match_wins += 1
+
+        if team_a_match_wins >= 2:
+            standings[team_a]["Won"] += 1
+            standings[team_a]["Points"] += 2
+            standings[team_b]["Lost"] += 1
+        else:
+            standings[team_b]["Won"] += 1
+            standings[team_b]["Points"] += 2
+            standings[team_a]["Lost"] += 1
+
+    df = pd.DataFrame.from_dict(standings, orient="index")
