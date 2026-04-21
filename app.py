@@ -110,8 +110,11 @@ elif menu == "Teams":
 # FIXTURES
 # -------------------------------------------------
 elif menu == "Fixtures":
-    st for tie in fixtures:    st.subheader("📅 Fixtures")
-        # ---- Header Row ----
+   elif menu == "Fixtures":
+    st.subheader("📅 Fixtures")
+
+    for tie in fixtures:
+        # Header row: Logo - Team A - VS - Team B - Logo
         col_logo_a, col_team_a, col_vs, col_team_b, col_logo_b = st.columns(
             [1, 3, 1, 3, 1]
         )
@@ -140,7 +143,7 @@ elif menu == "Fixtures":
         with col_logo_b:
             show_logo(tie["team_b"], width=60)
 
-        # ---- Matches ----
+        # Matches
         st.markdown("---")
         for i, match in enumerate(tie["matches"], start=1):
             st.markdown(
@@ -148,8 +151,6 @@ elif menu == "Fixtures":
             )
 
         st.divider()
-
-
 
 
 # -------------------------------------------------
