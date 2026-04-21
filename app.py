@@ -25,4 +25,4 @@ elif menu == "Standings":
 
 elif menu == "Admin":
     st.info("Admin login – coming next")
-``
+
