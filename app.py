@@ -205,3 +205,35 @@ elif menu == "Standings":
                     standings[team_b]["Points Lost"] += a_pts
 
                     if a_pts > b_pts:
+                        a_sets += 1
+                        standings[team_a]["Sets Won"] += 1
+                        standings[team_b]["Sets Lost"] += 1
+                    else:
+                        b_sets += 1
+                        standings[team_b]["Sets Won"] += 1
+                        standings[team_a]["Sets Lost"] += 1
+
+                if a_sets > b_sets:
+                    team_a_match_wins += 1
+                else:
+                    team_b_match_wins += 1
+
+            if team_a_match_wins >= 2:
+                standings[team_a]["Won"] += 1
+                standings[team_a]["Points"] += 2
+                standings[team_b]["Lost"] += 1
+            else:
+                standings[team_b]["Won"] += 1
+                standings[team_b]["Points"] += 2
+                standings[team_a]["Lost"] += 1
+
+        df = pd.DataFrame.from_dict(standings, orient="index")
+        df["Set Diff"] = df["Sets Won"] - df["Sets Lost"]
+        df["Point Diff"] = df["Points Won"] - df["Points Lost"]
+
+        df = df.sort_values(
+            by=["Points", "Set Diff", "Point Diff"],
+            ascending=False
+        )
+
+        st.dataframe(df, width="stretch")
