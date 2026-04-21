@@ -110,7 +110,7 @@ elif menu == "Teams":
 # FIXTURES
 # -------------------------------------------------
 elif menu == "Fixtures":
-   elif menu == "Fixtures":
+  
     st.subheader("📅 Fixtures")
 
     for tie in fixtures:
