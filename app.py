@@ -84,7 +84,33 @@ menu = st.radio(
 # HOME
 # -------------------------------------------------
 if menu == "Home":
-    st.success("✅ Tournament system is running correctly")
+    st.markdown(
+        """
+        <div style="
+            background-color:#f8f9fa;
+            padding:20px;
+            border-radius:12px;
+            border-left:6px solid #1f77b4;
+        ">
+        <h2>🏸 Mathi Gang Badminton Tournament</h2>
+        <h4>Official Rules & Format</h4>
+        <ul>
+            <li><b>Format:</b> League + Knockout</li>
+            <li><b>League:</b> Every team plays all others</li>
+            <li><b>Team Tie:</b> 3 matches per tie, win 2 to win tie</li>
+            <li><b>Scoring:</b> Best of 3 sets, 21 points, 2‑point lead</li>
+            <li><b>Qualification:</b> Top 4 teams to semifinals</li>
+            <li><b>Knockouts:</b> Rank 1 vs 4, Rank 2 vs 3</li>
+            <li><b>Player Rule:</b> Each player plays once per opponent team</li>
+            <li><b>Conduct:</b> Fair play & sportsmanship mandatory</li>
+        </ul>
+        <p style="font-size:13px;color:#555;">
+        📘 Full detailed rules are applied as per international badminton standards.
+        </p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
 # -------------------------------------------------
 # TEAMS
