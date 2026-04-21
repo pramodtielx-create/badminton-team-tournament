@@ -34,3 +34,17 @@ elif menu == "Fixtures":
         st.markdown(
             f"""
             ### Tie {tie['tie_id']}
+            **{tie['team_a']} vs {tie['team_b']}**
+            """
+        )
+
+        for i, match in enumerate(tie["matches"], start=1):
+            st.write(
+                f"Match {i}: {match[0]}  vs  {match[1]}"
+            )
+
+elif menu == "Standings":
+    st.info("Standings page – coming next")
+
+elif menu == "Admin":
+    st.info("Admin login – coming next")
