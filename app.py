@@ -97,4 +97,3 @@ with tabs[1]:
     st.subheader("✅ Qualified Teams (Top 2)")
     for t in df.head(2).index:
         st.success(t)
-``
