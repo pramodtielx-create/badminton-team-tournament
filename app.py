@@ -316,7 +316,7 @@ elif menu == "Team Standings":
 
             for m in r["matches"]:
                 if not m or "sets" not in m or not m["sets"]:
-                    continue  # ✅ skip empty match
+                    continue
 
                 a_sets = 0
                 b_sets = 0
@@ -341,13 +341,14 @@ elif menu == "Team Standings":
 
         df = pd.DataFrame.from_dict(table, orient="index")
         df = df.sort_values(by=["Points", "Won"], ascending=False)
-#=========================================================================
-        elif menu == "Player Standings":
+
+        st.dataframe(df, width="stretch")
+#=================================================================================
+elif menu == "Player Standings":
     st.subheader("👤 Individual Player Standings")
 
     results = load_json("data/results.json", [])
 
-    # 1️⃣ Initialize all players with 0
     stats = defaultdict(lambda: {
         "Team": "",
         "Played": 0,
@@ -356,11 +357,12 @@ elif menu == "Team Standings":
         "Form": deque(maxlen=5)
     })
 
+    # Initialize all players with 0
     for team, players in teams_data.items():
         for p in players:
             stats[p]["Team"] = team
 
-    # 2️⃣ Apply results
+    # Apply results
     for r in results:
         fixture = next(
             (f for f in fixtures if f["tie_id"] == r["tie_id"]),
@@ -371,7 +373,7 @@ elif menu == "Team Standings":
 
         for i, m in enumerate(r["matches"]):
             if not m or "sets" not in m or not m["sets"]:
-                continue  # ✅ skip empty match
+                continue
 
             pair_a = fixture["matches"][i][0].split("/")
             pair_b = fixture["matches"][i][1].split("/")
@@ -421,9 +423,6 @@ elif menu == "Team Standings":
         st.success(f"🥇 Player of the Tournament: **{pot}** ({dfp.loc[pot,'Team']})")
     else:
         st.info("Player of the Tournament will be decided after matches are played.")
+``
 
 
-
-        st.dataframe(df, width="stretch")
-        #============================================================
-        
