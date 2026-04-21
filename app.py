@@ -61,9 +61,8 @@ overflow-y:auto;
 
 <h4>4. Qualification</h4>
 <ul>
-<li>Top 4 teams qualify for semifinals.</li>
-<li>SF1: Rank 1 vs Rank 4</li>
-<li>SF2: Rank 2 vs Rank 3</li>
+<li>Top 2 teams qualify for Finals.</li>
+<li>Bottom 2 Teams will play for 3rd and 4th/li>
 </ul>
 
 <hr>
