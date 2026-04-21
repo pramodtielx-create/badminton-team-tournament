@@ -186,6 +186,41 @@ elif menu == "Fixtures":
 # =================================================
 # RESULTS (PUBLIC)
 # =================================================
+
+# =================================================
+# RESULTS (PUBLIC – READ ONLY)
+# =================================================
+elif menu == "Results":
+    st.subheader("📊 Match Results")
+
+    results = load_json("data/results.json", [])
+
+    if not results:
+        st.warning("No results entered yet.")
+    else:
+        for r in results:
+            c1, c2, c3 = st.columns([1,4,1])
+
+            with c1:
+                show_logo(r["team_a"])
+
+            with c2:
+                st.subheader(f"{r['team_a']} VS {r['team_b']}")
+
+            with c3:
+                show_logo(r["team_b"])
+
+            for i, m in enumerate(r["matches"], start=1):
+                if m.get("sets"):
+                    score = " | ".join(
+                        f"{s[0]}-{s[1]}" for s in m["sets"]
+                    )
+                    st.write(f"Match {i}: {score}")
+                else:
+                    st.write(f"Match {i}: —")
+
+            st.divider()
+#================================================================
 elif menu == "Enter Results":
     st.subheader("📝 Enter Match Results")
 
