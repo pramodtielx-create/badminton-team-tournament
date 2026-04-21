@@ -1,6 +1,20 @@
 import streamlit as st
 import json
 import pandas as pd
+
+# -------------------------------------------------
+# PAGE CONFIG
+# -------------------------------------------------
+st.set_page_config(
+    page_title="🏸 Badminton Tournament",
+    layout="wide"
+)
+
+st.title("🏸 Badminton Tournament")
+
+# -------------------------------------------------
+# TEAM COMBINATIONS (PLAYERS PER TEAM)
+# -------------------------------------------------
 teams_data = {
     "Smash Titans": [
         "Omkar", "Nishit", "Ganesh",
@@ -19,15 +33,6 @@ teams_data = {
         "Vikram", "Pramod", "Deepak T"
     ]
 }
-# -------------------------------------------------
-# PAGE CONFIG
-# -------------------------------------------------
-st.set_page_config(
-    page_title="🏸 Badminton Tournament",
-    layout="wide"
-)
-
-st.title("🏸 Badminton Tournament")
 
 # -------------------------------------------------
 # DATA LOADERS
@@ -56,7 +61,7 @@ results = load_results()
 # -------------------------------------------------
 menu = st.radio(
     "Navigate",
-    ["Home", "Fixtures", "Enter Results", "Standings"],
+    ["Home", "Teams", "Fixtures", "Enter Results", "Standings"],
     horizontal=True
 )
 
@@ -65,7 +70,20 @@ menu = st.radio(
 # -------------------------------------------------
 if menu == "Home":
     st.success("✅ Tournament system is running correctly")
-    st.write("Use the menu above to view fixtures, enter results, and see standings.")
+    st.write("Use the menu above to view teams, fixtures, enter results, and see standings.")
+
+# -------------------------------------------------
+# TEAMS (TEAM COMBINATIONS)
+# -------------------------------------------------
+elif menu == "Teams":
+    st.subheader("👥 Team Combinations")
+
+    cols = st.columns(2)
+    for idx, (team, players) in enumerate(teams_data.items()):
+        with cols[idx % 2]:
+            st.markdown(f"### 🏸 {team}")
+            for p in players:
+                st.write(f"• {p}")
 
 # -------------------------------------------------
 # FIXTURES
@@ -142,70 +160,48 @@ elif menu == "Enter Results":
 elif menu == "Standings":
     st.subheader("📊 Team Standings")
 
-    # Initialize teams
-    teams = set()
-    for t in fixtures:
-        teams.add(t["team_a"])
-        teams.add(t["team_b"])
+    if len(results) == 0:
+        st.warning("⚠️ No results entered yet. Enter match results to see standings.")
+    else:
+        teams = set()
+        for t in fixtures:
+            teams.add(t["team_a"])
+            teams.add(t["team_b"])
 
-    standings = {
-        team: {
-            "Played": 0,
-            "Won": 0,
-            "Lost": 0,
-            "Points": 0,
-            "Sets Won": 0,
-            "Sets Lost": 0,
-            "Points Won": 0,
-            "Points Lost": 0
+        standings = {
+            team: {
+                "Played": 0,
+                "Won": 0,
+                "Lost": 0,
+                "Points": 0,
+                "Sets Won": 0,
+                "Sets Lost": 0,
+                "Points Won": 0,
+                "Points Lost": 0
+            }
+            for team in teams
         }
-        for team in teams
-    }
 
-    # Calculate standings from results
-    for r in results:
-        team_a = r["team_a"]
-        team_b = r["team_b"]
+        for r in results:
+            team_a = r["team_a"]
+            team_b = r["team_b"]
 
-        standings[team_a]["Played"] += 1
-        standings[team_b]["Played"] += 1
+            standings[team_a]["Played"] += 1
+            standings[team_b]["Played"] += 1
 
-        team_a_match_wins = 0
-        team_b_match_wins = 0
+            team_a_match_wins = 0
+            team_b_match_wins = 0
 
-        for match in r["matches"]:
-            a_sets = 0
-            b_sets = 0
+            for match in r["matches"]:
+                a_sets = 0
+                b_sets = 0
 
-            for s in match["sets"]:
-                a_pts, b_pts = s
+                for s in match["sets"]:
+                    a_pts, b_pts = s
 
-                standings[team_a]["Points Won"] += a_pts
-                standings[team_a]["Points Lost"] += b_pts
-                standings[team_b]["Points Won"] += b_pts
-                standings[team_b]["Points Lost"] += a_pts
+                    standings[team_a]["Points Won"] += a_pts
+                    standings[team_a]["Points Lost"] += b_pts
+                    standings[team_b]["Points Won"] += b_pts
+                    standings[team_b]["Points Lost"] += a_pts
 
-                if a_pts > b_pts:
-                    a_sets += 1
-                    standings[team_a]["Sets Won"] += 1
-                    standings[team_b]["Sets Lost"] += 1
-                else:
-                    b_sets += 1
-                    standings[team_b]["Sets Won"] += 1
-                    standings[team_a]["Sets Lost"] += 1
-
-            if a_sets > b_sets:
-                team_a_match_wins += 1
-            else:
-                team_b_match_wins += 1
-
-        if team_a_match_wins >= 2:
-            standings[team_a]["Won"] += 1
-            standings[team_a]["Points"] += 2
-            standings[team_b]["Lost"] += 1
-        else:
-            standings[team_b]["Won"] += 1
-            standings[team_b]["Points"] += 2
-            standings[team_a]["Lost"] += 1
-
-    df = pd.DataFrame.from_dict(standings, orient="index")
+                    if a_pts > b_pts:
