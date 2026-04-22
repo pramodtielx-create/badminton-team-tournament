@@ -259,7 +259,7 @@ elif menu == "Results":
         st.warning("No results entered yet.")
     else:
         for r in results:
-            c1, c2, c3 = st.columns([1,4,1])
+            c1, c2, c3 = st.columns([1, 4, 1])
 
             with c1:
                 show_logo(r["team_a"])
@@ -270,16 +270,32 @@ elif menu == "Results":
             with c3:
                 show_logo(r["team_b"])
 
+            # ✅ Loop over matches in this tie
             for i, m in enumerate(r["matches"], start=1):
-                if m.get("sets"):
-                    score = " | ".join(
-                        f"{s[0]}-{s[1]}" for s in m["sets"]
-                    )
-                    st.write(f"Match {i}: {score}")
-                else:
+                if not m or "sets" not in m or not m["sets"]:
                     st.write(f"Match {i}: —")
+                    continue
+
+                # ---- Show match score ----
+                score = " | ".join(f"{s[0]}-{s[1]}" for s in m["sets"])
+                st.write(f"Match {i}: {score}")
+
+                # ✅ GET PAIRS FROM FIXTURES
+                fixture = next(
+                    f for f in fixtures if f["tie_id"] == r["tie_id"]
+                )
+
+                pair_a = fixture["matches"][i-1][0].split("/")
+                pair_b = fixture["matches"][i-1][1].split("/")
+
+                # ✅ CALCULATE PLAYER OF THE MATCH
+                potm = calculate_potm(m["sets"], pair_a, pair_b)
+
+                # ✅ DISPLAY POTM
+                st.caption(f"🏅 Player of the Match: {potm}")
 
             st.divider()
+
 #================================================================
 elif menu == "Enter Results":
     st.subheader("📝 Enter Match Results")
@@ -323,34 +339,40 @@ elif menu == "Enter Results":
 
             match_results.append({"sets": sets})
 
-        if st.button("✅ Save Results"):
-            tie_result = next(
-                (
-                    r for r in results
-                    if r["tie_id"] == tie["tie_id"]
-                ),
-                {
-                    "tie_id": tie["tie_id"],
-                    "team_a": tie["team_a"],
-                    "team_b": tie["team_b"],
-                    "matches": [{}, {}, {}]
-                }
-            )
+      if st.button("✅ Save Results"):
+    # Load existing results fresh
+    results = load_json("data/results.json", [])
 
-            for idx, match in enumerate(match_results):
-                if match["sets"]:
-                    tie_result["matches"][idx] = match
+    # Find existing tie result (if already saved)
+    tie_result = next(
+        (r for r in results if r["tie_id"] == tie["tie_id"]),
+        {
+            "tie_id": tie["tie_id"],
+            "team_a": tie["team_a"],
+            "team_b": tie["team_b"],
+            "matches": [{}, {}, {}]  # placeholders for 3 matches
+        }
+    )
 
-            updated_results = [
-                r for r in results
-                if r["tie_id"] != tie["tie_id"]
-            ]
-            updated_results.append(tie_result)
+    # Update matches one by one (DO NOT overwrite others)
+    for idx, match in enumerate(match_results):
+        if match["sets"]:
+            tie_result["matches"][idx] = {
+                "sets": match["sets"]
+            }
 
-            save_json("data/results.json", updated_results)
+    # Remove old tie entry if exists
+    results = [r for r in results if r["tie_id"] != tie["tie_id"]]
 
-            st.success("✅ Results saved (previous matches preserved)")
-            st.rerun()
+    # Add updated tie result
+    results.append(tie_result)
+
+    # ✅ WRITE TO results.json
+    save_json("data/results.json", results)
+
+    st.success("✅ Results saved to results.json (no overwrite)")
+    st.rerun()
+
 #========================================================================
 elif menu == "Team Standings":
     st.subheader("📊 Team Standings")
@@ -422,28 +444,25 @@ elif menu == "Player Standings":
     st.subheader("👤 Individual Player Standings")
 
     results = load_json("data/results.json", [])
+    final_result = load_json("data/final_result.json", {})
 
     stats = defaultdict(lambda: {
         "Team": "",
         "Played": 0,
-        "Won": 0,
-        "Points": 0,
-        "Form": deque(maxlen=5)
+        "Match Wins": 0,
+        "Set Diff": 0,
+        "Point Diff": 0,
+        "Final Bonus": 0
     })
 
-    # Initialize all players with 0
+    # Initialize all players
     for team, players in teams_data.items():
         for p in players:
             stats[p]["Team"] = team
 
-    # Apply results
+    # League matches
     for r in results:
-        fixture = next(
-            (f for f in fixtures if f["tie_id"] == r["tie_id"]),
-            None
-        )
-        if not fixture:
-            continue
+        fixture = next(f for f in fixtures if f["tie_id"] == r["tie_id"])
 
         for i, m in enumerate(r["matches"]):
             if not m or "sets" not in m or not m["sets"]:
@@ -452,10 +471,12 @@ elif menu == "Player Standings":
             pair_a = fixture["matches"][i][0].split("/")
             pair_b = fixture["matches"][i][1].split("/")
 
-            a_sets = 0
-            b_sets = 0
+            a_sets = b_sets = 0
+            a_pts = b_pts = 0
 
-            for a, b in m["sets"]:
+            for a,b in m["sets"]:
+                a_pts += a
+                b_pts += b
                 if a > b:
                     a_sets += 1
                 else:
@@ -466,34 +487,57 @@ elif menu == "Player Standings":
             for p in pair_a:
                 p = p.strip()
                 stats[p]["Played"] += 1
-                stats[p]["Form"].append("✅" if a_win else "❌")
+                stats[p]["Set Diff"] += (a_sets - b_sets)
+                stats[p]["Point Diff"] += (a_pts - b_pts)
                 if a_win:
-                    stats[p]["Won"] += 1
-                    stats[p]["Points"] += 2
+                    stats[p]["Match Wins"] += 1
 
             for p in pair_b:
                 p = p.strip()
                 stats[p]["Played"] += 1
-                stats[p]["Form"].append("✅" if not a_win else "❌")
+                stats[p]["Set Diff"] += (b_sets - a_sets)
+                stats[p]["Point Diff"] += (b_pts - a_pts)
                 if not a_win:
-                    stats[p]["Won"] += 1
-                    stats[p]["Points"] += 2
+                    stats[p]["Match Wins"] += 1
+
+    # ✅ 3️⃣ FINAL MATCH BONUS
+    if final_result.get("sets"):
+        finalists = final_result.get("finalists", [])
+        winner = None
+        a_sets = sum(1 for a,b in final_result["sets"] if a > b)
+        b_sets = sum(1 for a,b in final_result["sets"] if b > a)
+        winner = finalists[0] if a_sets > b_sets else finalists[1]
+
+        for p in teams_datastats[p]["Final Bonus"] = 1
 
     dfp = pd.DataFrame.from_dict(stats, orient="index")
-    dfp["Recent Form"] = dfp["Form"].apply(lambda x: " ".join(list(x)))
 
     dfp = dfp.sort_values(
-        by=["Points", "Won", "Played"],
-        ascending=[False, False, True]
+        by=["Match Wins", "Set Diff", "Point Diff", "Final Bonus", "Played"],
+        ascending=[False, False, False, False, True]
     )
 
     st.dataframe(
-        dfp[["Team", "Played", "Won", "Points", "Recent Form"]],
+        dfp[["Team","Played","Match Wins","Set Diff","Point Diff","Final Bonus"]],
         width="stretch"
     )
 
-    if dfp["Points"].max() > 0:
-        pot = dfp.index[0]
-        st.success(f"🥇 Player of the Tournament: **{pot}** ({dfp.loc[pot,'Team']})")
+    pot = dfp.index[0]
+    st.success(f"🏆 Player of the Tournament: **{pot}** ({dfp.loc[pot,'Team']})")
+#=====================================================================####
+def calculate_potm(match_sets, pair_a, pair_b):
+    # match_sets = [[a,b], [a,b], ...]
+    a_sets = sum(1 for a,b in match_sets if a > b)
+    b_sets = sum(1 for a,b in match_sets if b > a)
+
+    a_point_diff = sum(a-b for a,b in match_sets)
+    b_point_diff = sum(b-a for a,b in match_sets)
+
+    if a_sets > b_sets:
+        # pick one from winning pair (club‑acceptable)
+        return pair_a[0].strip()
+    elif b_sets > a_sets:
+        return pair_b[0].strip()
     else:
-        st.info("Player of the Tournament will be decided after matches are played.")
+        # tie → higher point diff
+        return pair_a[0].strip() if a_point_diff >= b_point_diff else pair_b[0].strip()
