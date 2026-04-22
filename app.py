@@ -460,15 +460,12 @@ elif menu == "Team Standings":
         st.dataframe(df, width="stretch")
 
 #=================================================================================
-
-#=====================================================================
 elif menu == "Player Standings":
     st.subheader("👤 Individual Player Standings")
 
     results = load_json("data/results.json", [])
     final_result = load_json("data/final_result.json", {})
 
-    # ✅ Initialize all players with 0 stats
     stats = defaultdict(lambda: {
         "Team": "",
         "Played": 0,
@@ -478,11 +475,12 @@ elif menu == "Player Standings":
         "Final Bonus": 0
     })
 
+    # Initialize all players
     for team, players in teams_data.items():
         for p in players:
             stats[p]["Team"] = team
 
-    # ✅ Apply league results (if any)
+    # Apply league results
     for r in results:
         fixture = next(
             (f for f in fixtures if f["tie_id"] == r["tie_id"]),
@@ -523,3 +521,35 @@ elif menu == "Player Standings":
                 p = p.strip()
                 stats[p]["Played"] += 1
                 stats[p]["Set Diff"] += (b_sets - a_sets)
+                stats[p]["Point Diff"] += (b_pts - a_pts)
+                if not a_win:
+                    stats[p]["Match Wins"] += 1
+
+    # Final bonus
+    if final_result.get("sets"):
+        finalists = final_result.get("finalists", [])
+        if len(finalists) == 2:
+            a_sets = sum(1 for a, b in final_result["sets"] if a > b)
+            b_sets = sum(1 for a, b in final_result["sets"] if b > a)
+            winner = finalists[0] if a_sets > b_sets else finalists[1]
+
+            for p in teams_data.get(winner, []):
+                stats[p]["Final Bonus"] = 1
+
+    dfp = pd.DataFrame.from_dict(stats, orient="index")
+    dfp = dfp.sort_values(
+        by=["Match Wins", "Set Diff", "Point Diff", "Final Bonus", "Played"],
+        ascending=[False, False, False, False, True]
+    )
+
+    st.dataframe(
+        dfp[["Team", "Played", "Match Wins", "Set Diff", "Point Diff", "Final Bonus"]],
+        width="stretch"
+    )
+
+    if results and dfp["Match Wins"].max() > 0:
+        pot = dfp.index[0]
+        st.success(f"🏆 Player of the Tournament: **{pot}** ({dfp.loc[pot,'Team']})")
+    else:
+        st.info("Player of the Tournament will be decided once matches are played.")
+``
