@@ -460,12 +460,15 @@ elif menu == "Team Standings":
         st.dataframe(df, width="stretch")
 
 #=================================================================================
+
+#=====================================================================
 elif menu == "Player Standings":
     st.subheader("👤 Individual Player Standings")
 
     results = load_json("data/results.json", [])
     final_result = load_json("data/final_result.json", {})
 
+    # ✅ Initialize all players with 0 stats
     stats = defaultdict(lambda: {
         "Team": "",
         "Played": 0,
@@ -475,14 +478,18 @@ elif menu == "Player Standings":
         "Final Bonus": 0
     })
 
-    # Initialize all players
     for team, players in teams_data.items():
         for p in players:
             stats[p]["Team"] = team
 
-    # League matches
+    # ✅ Apply league results (if any)
     for r in results:
-        fixture = next(f for f in fixtures if f["tie_id"] == r["tie_id"])
+        fixture = next(
+            (f for f in fixtures if f["tie_id"] == r["tie_id"]),
+            None
+        )
+        if not fixture:
+            continue
 
         for i, m in enumerate(r["matches"]):
             if not m or "sets" not in m or not m["sets"]:
@@ -494,7 +501,7 @@ elif menu == "Player Standings":
             a_sets = b_sets = 0
             a_pts = b_pts = 0
 
-            for a,b in m["sets"]:
+            for a, b in m["sets"]:
                 a_pts += a
                 b_pts += b
                 if a > b:
@@ -516,54 +523,3 @@ elif menu == "Player Standings":
                 p = p.strip()
                 stats[p]["Played"] += 1
                 stats[p]["Set Diff"] += (b_sets - a_sets)
-                stats[p]["Point Diff"] += (b_pts - a_pts)
-                if not a_win:
-                    stats[p]["Match Wins"] += 1
-
-    # ✅ 3️⃣ FINAL MATCH BONUS
-   # ✅ Apply Final Match Bonus (International Standard)
-if final_result.get("sets"):
-    finalists = final_result.get("finalists", [])
-
-    if len(finalists) == 2:
-        a_sets = sum(1 for a, b in final_result["sets"] if a > b)
-        b_sets = sum(1 for a, b in final_result["sets"] if b > a)
-
-        winner_team = finalists[0] if a_sets > b_sets else finalists[1]
-
-        # ✅ Award bonus to players of winning team
-        for player in teams_data[winner_team]:
-            stats[player]["Final Bonus"] = 1
-
-
-    dfp = pd.DataFrame.from_dict(stats, orient="index")
-
-    dfp = dfp.sort_values(
-        by=["Match Wins", "Set Diff", "Point Diff", "Final Bonus", "Played"],
-        ascending=[False, False, False, False, True]
-    )
-
-    st.dataframe(
-        dfp[["Team","Played","Match Wins","Set Diff","Point Diff","Final Bonus"]],
-        width="stretch"
-    )
-
-    pot = dfp.index[0]
-    st.success(f"🏆 Player of the Tournament: **{pot}** ({dfp.loc[pot,'Team']})")
-#=====================================================================####
-def calculate_potm(match_sets, pair_a, pair_b):
-    # match_sets = [[a,b], [a,b], ...]
-    a_sets = sum(1 for a,b in match_sets if a > b)
-    b_sets = sum(1 for a,b in match_sets if b > a)
-
-    a_point_diff = sum(a-b for a,b in match_sets)
-    b_point_diff = sum(b-a for a,b in match_sets)
-
-    if a_sets > b_sets:
-        # pick one from winning pair (club‑acceptable)
-        return pair_a[0].strip()
-    elif b_sets > a_sets:
-        return pair_b[0].strip()
-    else:
-        # tie → higher point diff
-        return pair_a[0].strip() if a_point_diff >= b_point_diff else pair_b[0].strip()
