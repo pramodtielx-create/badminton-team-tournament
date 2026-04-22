@@ -250,6 +250,9 @@ elif menu == "Fixtures":
 # =================================================
 # RESULTS (PUBLIC – READ ONLY)
 # =================================================
+# =================================================
+# RESULTS (PUBLIC – READ ONLY)
+# =================================================
 elif menu == "Results":
     st.subheader("📊 Match Results")
 
@@ -270,17 +273,14 @@ elif menu == "Results":
             with c3:
                 show_logo(r["team_b"])
 
-            # ✅ Loop over matches in this tie
             for i, m in enumerate(r["matches"], start=1):
                 if not m or "sets" not in m or not m["sets"]:
                     st.write(f"Match {i}: —")
                     continue
 
-                # ---- Show match score ----
                 score = " | ".join(f"{s[0]}-{s[1]}" for s in m["sets"])
                 st.write(f"Match {i}: {score}")
 
-                # ✅ GET PAIRS FROM FIXTURES
                 fixture = next(
                     f for f in fixtures if f["tie_id"] == r["tie_id"]
                 )
@@ -288,15 +288,14 @@ elif menu == "Results":
                 pair_a = fixture["matches"][i-1][0].split("/")
                 pair_b = fixture["matches"][i-1][1].split("/")
 
-                # ✅ CALCULATE PLAYER OF THE MATCH
                 potm = calculate_potm(m["sets"], pair_a, pair_b)
-
-                # ✅ DISPLAY POTM
                 st.caption(f"🏅 Player of the Match: {potm}")
 
             st.divider()
 
-#================================================================
+# =================================================
+# ENTER RESULTS (ADMIN ONLY)
+# =================================================
 elif menu == "Enter Results":
     st.subheader("📝 Enter Match Results")
 
@@ -339,39 +338,30 @@ elif menu == "Enter Results":
 
             match_results.append({"sets": sets})
 
-      if st.button("✅ Save Results"):
-    # Load existing results fresh
-    results = load_json("data/results.json", [])
+        if st.button("✅ Save Results"):
+            results = load_json("data/results.json", [])
 
-    # Find existing tie result (if already saved)
-    tie_result = next(
-        (r for r in results if r["tie_id"] == tie["tie_id"]),
-        {
-            "tie_id": tie["tie_id"],
-            "team_a": tie["team_a"],
-            "team_b": tie["team_b"],
-            "matches": [{}, {}, {}]  # placeholders for 3 matches
-        }
-    )
+            tie_result = next(
+                (r for r in results if r["tie_id"] == tie["tie_id"]),
+                {
+                    "tie_id": tie["tie_id"],
+                    "team_a": tie["team_a"],
+                    "team_b": tie["team_b"],
+                    "matches": [{}, {}, {}]
+                }
+            )
 
-    # Update matches one by one (DO NOT overwrite others)
-    for idx, match in enumerate(match_results):
-        if match["sets"]:
-            tie_result["matches"][idx] = {
-                "sets": match["sets"]
-            }
+            for idx, match in enumerate(match_results):
+                if match["sets"]:
+                    tie_result["matches"][idx] = {"sets": match["sets"]}
 
-    # Remove old tie entry if exists
-    results = [r for r in results if r["tie_id"] != tie["tie_id"]]
+            results = [r for r in results if r["tie_id"] != tie["tie_id"]]
+            results.append(tie_result)
 
-    # Add updated tie result
-    results.append(tie_result)
+            save_json("data/results.json", results)
 
-    # ✅ WRITE TO results.json
-    save_json("data/results.json", results)
-
-    st.success("✅ Results saved to results.json (no overwrite)")
-    st.rerun()
+            st.success("✅ Results saved (previous matches preserved)")
+            st.rerun()
 
 #========================================================================
 elif menu == "Team Standings":
