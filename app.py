@@ -491,14 +491,20 @@ elif menu == "Player Standings":
                     stats[p]["Match Wins"] += 1
 
     # ✅ 3️⃣ FINAL MATCH BONUS
-    if final_result.get("sets"):
-        finalists = final_result.get("finalists", [])
-        winner = None
-        a_sets = sum(1 for a,b in final_result["sets"] if a > b)
-        b_sets = sum(1 for a,b in final_result["sets"] if b > a)
-        winner = finalists[0] if a_sets > b_sets else finalists[1]
+   # ✅ Apply Final Match Bonus (International Standard)
+if final_result.get("sets"):
+    finalists = final_result.get("finalists", [])
 
-        for p in teams_datastats[p]["Final Bonus"] = 1
+    if len(finalists) == 2:
+        a_sets = sum(1 for a, b in final_result["sets"] if a > b)
+        b_sets = sum(1 for a, b in final_result["sets"] if b > a)
+
+        winner_team = finalists[0] if a_sets > b_sets else finalists[1]
+
+        # ✅ Award bonus to players of winning team
+        for player in teams_data[winner_team]:
+            stats[player]["Final Bonus"] = 1
+
 
     dfp = pd.DataFrame.from_dict(stats, orient="index")
 
