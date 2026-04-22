@@ -536,16 +536,21 @@ elif menu == "Player Standings":
             for p in teams_data.get(winner, []):
                 stats[p]["Final Bonus"] = 1
 
-    dfp = pd.DataFrame.from_dict(stats, orient="index")
-    dfp = dfp.sort_values(
-        by=["Match Wins", "Set Diff", "Point Diff", "Final Bonus", "Played"],
-        ascending=[False, False, False, False, True]
-    )
+    # Convert player name (index) into a column
+dfp = pd.DataFrame.from_dict(stats, orient="index")
+dfp = dfp.reset_index().rename(columns={"index": "Player"})
 
-    st.dataframe(
-        dfp[["Team", "Played", "Match Wins", "Set Diff", "Point Diff", "Final Bonus"]],
-        width="stretch"
-    )
+# Sort using international standard
+dfp = dfp.sort_values(
+    by=["Match Wins", "Set Diff", "Point Diff", "Final Bonus", "Played"],
+    ascending=[False, False, False, False, True]
+)
+
+# ✅ Team first, then Player (ONLY in Player Standings)
+st.dataframe(
+    dfp[["Team", "Player", "Played", "Match Wins", "Set Diff", "Point Diff", "Final Bonus"]],
+    width="stretch"
+)
 
     if results and dfp["Match Wins"].max() > 0:
         pot = dfp.index[0]
