@@ -3,6 +3,36 @@ import json
 import os
 import pandas as pd
 from collections import defaultdict, deque
+def calculate_potm(match_sets, pair_a, pair_b):
+    """
+    Player of the Match (International Standard – Club Level)
+    - Player must be from winning pair
+    - Decided by set wins, tie-break by point difference
+    """
+
+    a_sets = 0
+    b_sets = 0
+    a_point_diff = 0
+    b_point_diff = 0
+
+    for a, b in match_sets:
+        if a > b:
+            a_sets += 1
+        else:
+            b_sets += 1
+
+        a_point_diff += (a - b)
+        b_point_diff += (b - a)
+
+    # Winning pair decides POTM
+    if a_sets > b_sets:
+        return pair_a[0].strip()
+    elif b_sets > a_sets:
+        return pair_b[0].strip()
+    else:
+        # Rare tie case → use point dominance
+        return pair_a[0].strip() if a_point_diff >= b_point_diff else pair_b[0].strip()
+##################################################################3
 RULES_HTML = """
 <div style="background-color:#f8f9fa;padding:25px;border-radius:14px;
 border-left:6px solid #1f77b4;max-height:80vh;overflow-y:auto;">
