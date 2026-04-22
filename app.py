@@ -404,9 +404,9 @@ elif menu == "Team Standings":
     else:
         table = defaultdict(lambda: {
             "Played": 0,
-            "Tie Wins": 0,
             "Match Wins": 0,
             "Match Losses": 0,
+            "Tie Wins": 0,
             "Points": 0
         })
 
@@ -420,8 +420,7 @@ elif menu == "Team Standings":
                 if not m or "sets" not in m or not m["sets"]:
                     continue
 
-                a_sets = 0
-                b_sets = 0
+                a_sets = b_sets = 0
 
                 for a, b in m["sets"]:
                     if a > b:
@@ -429,7 +428,7 @@ elif menu == "Team Standings":
                     else:
                         b_sets += 1
 
-                # ✅ Count individual match result
+                # ✅ Match result
                 if a_sets > b_sets:
                     a_match_wins += 1
                     table[ta]["Match Wins"] += 1
@@ -439,21 +438,23 @@ elif menu == "Team Standings":
                     table[tb]["Match Wins"] += 1
                     table[ta]["Match Losses"] += 1
 
-            # ✅ Played = total matches (wins + losses)
-            table[ta]["Played"] = table[ta]["Match Wins"] + table[ta]["Match Losses"]
-            table[tb]["Played"] = table[tb]["Match Wins"] + table[tb]["Match Losses"]
+            # ✅ Played = total matches
+            table[ta]["Played"] += (a_match_wins + b_match_wins)
+            table[tb]["Played"] += (a_match_wins + b_match_wins)
 
-            # ✅ Tie winner
+            # ✅ Tie win (still shown, but not used for points)
             if a_match_wins >= 2:
                 table[ta]["Tie Wins"] += 1
-                table[ta]["Points"] += 2
             elif b_match_wins >= 2:
                 table[tb]["Tie Wins"] += 1
-                table[tb]["Points"] += 2
+
+        # ✅ FINAL POINTS CALCULATION
+        for team in table:
+            table[team]["Points"] = table[team]["Match Wins"] * 2
 
         df = pd.DataFrame.from_dict(table, orient="index")
         df = df.sort_values(
-            by=["Points", "Tie Wins", "Match Wins"],
+            by=["Points", "Match Wins", "Tie Wins"],
             ascending=False
         )
 
