@@ -18,7 +18,7 @@
     "toss": "Net Ninjas",
     "service": "Racket Scientists",
     "matches": [
-      ["Kiran / Pradyumna", "Jaswanth / Vikram"],
+      ["Kiran / Pradyum", "Jaswanth / Vikram"],
       ["Kaustubh / Amol S", "Ritesh / Pramod"],
       ["Piyush / Amol P", "Sandeepk / Deepak T"]
     ]
@@ -32,7 +32,7 @@
     "matches": [
       ["Omkar / Nishit", "Kiran / Piyush"],
       ["Sandeep W / Jayant", "Amol S / Amol P"],
-      ["Ganesh / Amit", "Kaustubh / Pradyumna"]
+      ["Ganesh / Amit", "Kaustubh / Pradyum"]
     ]
   },
   {
@@ -68,7 +68,7 @@
     "matches": [
       ["Rahul / Manmohan", "Amol S / Amol P"],
       ["Aniket / Deepak L", "Kaustubh / Piyush"],
-      ["Rajendra / Prashant", "Kiran / Pradyumna"]
+      ["Rajendra / Prashant", "Kiran / Pradyum"]
     ]
   }
 ]
