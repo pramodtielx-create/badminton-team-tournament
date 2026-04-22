@@ -362,14 +362,14 @@ elif menu == "Team Standings":
     else:
         table = defaultdict(lambda: {
             "Played": 0,
-            "Won": 0,
+            "Tie Wins": 0,
+            "Match Wins": 0,
+            "Match Losses": 0,
             "Points": 0
         })
 
         for r in results:
             ta, tb = r["team_a"], r["team_b"]
-            table[ta]["Played"] += 1
-            table[tb]["Played"] += 1
 
             a_match_wins = 0
             b_match_wins = 0
@@ -387,22 +387,36 @@ elif menu == "Team Standings":
                     else:
                         b_sets += 1
 
+                # ✅ Count individual match result
                 if a_sets > b_sets:
                     a_match_wins += 1
+                    table[ta]["Match Wins"] += 1
+                    table[tb]["Match Losses"] += 1
                 else:
                     b_match_wins += 1
+                    table[tb]["Match Wins"] += 1
+                    table[ta]["Match Losses"] += 1
 
+            # ✅ Played = total matches (wins + losses)
+            table[ta]["Played"] = table[ta]["Match Wins"] + table[ta]["Match Losses"]
+            table[tb]["Played"] = table[tb]["Match Wins"] + table[tb]["Match Losses"]
+
+            # ✅ Tie winner
             if a_match_wins >= 2:
-                table[ta]["Won"] += 1
+                table[ta]["Tie Wins"] += 1
                 table[ta]["Points"] += 2
             elif b_match_wins >= 2:
-                table[tb]["Won"] += 1
+                table[tb]["Tie Wins"] += 1
                 table[tb]["Points"] += 2
 
         df = pd.DataFrame.from_dict(table, orient="index")
-        df = df.sort_values(by=["Points", "Won"], ascending=False)
+        df = df.sort_values(
+            by=["Points", "Tie Wins", "Match Wins"],
+            ascending=False
+        )
 
         st.dataframe(df, width="stretch")
+
 #=================================================================================
 elif menu == "Player Standings":
     st.subheader("👤 Individual Player Standings")
