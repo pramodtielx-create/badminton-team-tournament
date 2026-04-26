@@ -142,6 +142,28 @@ def render_fixture_card(tie, status, completed_matches):
             icon = "✅"
             subtitle = "Completed"
             opacity = "1.0"
+        else:
+            icon = "🕒"
+            subtitle = "Not played yet"
+            opacity = "0.5"
+
+        st.markdown(
+            f"""
+            <div style="padding:8px 0; line-height:1.6; opacity:{opacity};">
+                <b>M{idx}</b> {icon}<br>
+                {pair_a}<br>
+                <span style="color:#ff7f0e;">vs</span><br>
+                {pair_b}<br>
+                <span style="font-size:12px;color:#777;">{subtitle}</span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    # =========================
+    # Close card
+    # =========================
+    st.markdown("</div>", unsafe_allow_html=True)
 
 # =================================================
 # LOAD FIXTURES
@@ -221,8 +243,12 @@ elif menu == "Fixtures":
         for i in range(0, len(upcoming), 2):
             cols = st.columns(2)
             for col, tie in zip(cols, upcoming[i:i+2]):
-                with col:
-                    render_fixture_card(tie, "UPCOMING")
+               with col:
+    render_fixture_card(
+        tie,
+        "UPCOMING",
+        completed_map.get(tie["tie_id"], [])
+    )
 
     if closed:
         st.markdown("## ✅ Closed Fixtures")
@@ -230,7 +256,13 @@ elif menu == "Fixtures":
             cols = st.columns(2)
             for col, tie in zip(cols, closed[i:i+2]):
                 with col:
-                    render_fixture_card(tie, "CLOSED")
+                   with col:
+    render_fixture_card(
+        tie,
+        "CLOSED",
+        completed_map.get(tie["tie_id"], [])
+    )
+
 
 # =================================================
 # TEAM STANDINGS
