@@ -1,3 +1,10 @@
+import streamlit as st
+import streamlit.components.v1 as components
+import json
+import requests
+from collections import defaultdict
+
+# After imports, before menu
 components.html("""
 <style>
 @media (max-width: 768px) {
@@ -5,12 +12,6 @@ components.html("""
 }
 </style>
 """, height=0)
-import streamlit as st
-import streamlit.components.v1 as components
-import json
-import requests
-from collections import defaultdict
-
 # =================================================
 # PAGE CONFIG
 # =================================================
