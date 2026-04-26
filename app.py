@@ -246,23 +246,146 @@ elif menu == "Enter Results":
 # TEAM STANDINGS
 # =================================================
 elif menu == "Team Standings":
+    st.subheader("📊 Team Standings")
+
     results = load_results_from_sheet()
-    table = defaultdict(lambda: {"Match Wins":0,"Points":0})
+
+    table = defaultdict(lambda: {
+        "Matches Played": 0,
+        "Match Wins": 0,
+        "Match Losses": 0,
+        "Set Diff": 0,
+        "Point Diff": 0,
+        "Points": 0,
+        "Form": []
+    })
 
     for r in results:
-        for m in r["matches"]:
-            if m:
-                a_sets = sum(1 for a,b in m["sets"] if a>b)
-                b_sets = sum(1 for a,b in m["sets"] if b>a)
-                if a_sets>b_sets:
-                    table[r["team_a"]]["Match Wins"]+=1
-                else:
-                    table[r["team_b"]]["Match Wins"]+=1
+        ta, tb = r["team_a"], r["team_b"]
 
+        for m in r["matches"]:
+            if not m or "sets" not in m or not m["sets"]:
+                continue
+
+            a_sets = b_sets = 0
+            a_pts = b_pts = 0
+
+            for a, b in m["sets"]:
+                a_pts += a
+                b_pts += b
+                if a > b:
+                    a_sets += 1
+                else:
+                    b_sets += 1
+
+            # Matches played
+            table[ta]["Matches Played"] += 1
+            table[tb]["Matches Played"] += 1
+
+            # Set & point difference
+            table[ta]["Set Diff"] += (a_sets - b_sets)
+            table[tb]["Set Diff"] += (b_sets - a_sets)
+            table[ta]["Point Diff"] += (a_pts - b_pts)
+            table[tb]["Point Diff"] += (b_pts - a_pts)
+
+            # Match result
+            if a_sets > b_sets:
+                table[ta]["Match Wins"] += 1
+                table[tb]["Match Losses"] += 1
+                table[ta]["Form"].append("W")
+                table[tb]["Form"].append("L")
+            else:
+                table[tb]["Match Wins"] += 1
+                table[ta]["Match Losses"] += 1
+                table[tb]["Form"].append("W")
+                table[ta]["Form"].append("L")
+
+    # Points = Match Wins × 2
     for t in table:
-        table[t]["Points"] = table[t]["Match Wins"]*2
+        table[t]["Points"] = table[t]["Match Wins"] * 2
+        # Keep last 5 matches only
+        table[t]["Form"] = " ".join(table[t]["Form"][-5:])
 
     df = pd.DataFrame.from_dict(table, orient="index")
-    st.dataframe(df.sort_values("Points",ascending=False))
+    df = df.sort_values(
+        by=["Points", "Match Wins", "Set Diff", "Point Diff"],
+        ascending=False
+    )
+
+    st.dataframe(df, width="stretch")
 
 # =================================================
+elif menu == "Player Standings":
+    st.subheader("👤 Player Standings")
+
+    results = load_results_from_sheet()
+
+    stats = defaultdict(lambda: {
+        "Team": "",
+        "Played": 0,
+        "Match Wins": 0,
+        "Set Diff": 0,
+        "Point Diff": 0
+    })
+
+    # Initialize all players
+    for team, players in teams_data.items():
+        for p in players:
+            stats[p]["Team"] = team
+
+    for r in results:
+        fixture = next((f for f in fixtures if f["tie_id"] == r["tie_id"]), None)
+        if not fixture:
+            continue
+
+        for i, m in enumerate(r["matches"]):
+            if not m or "sets" not in m or not m["sets"]:
+                continue
+
+            pair_a = fixture["matches"][i][0].split("/")
+            pair_b = fixture["matches"][i][1].split("/")
+
+            a_sets = b_sets = 0
+            a_pts = b_pts = 0
+
+            for a, b in m["sets"]:
+                a_pts += a
+                b_pts += b
+                if a > b:
+                    a_sets += 1
+                else:
+                    b_sets += 1
+
+            a_win = a_sets > b_sets
+
+            for p in pair_a:
+                p = p.strip()
+                stats[p]["Played"] += 1
+                stats[p]["Set Diff"] += (a_sets - b_sets)
+                stats[p]["Point Diff"] += (a_pts - b_pts)
+                if a_win:
+                    stats[p]["Match Wins"] += 1
+
+            for p in pair_b:
+                p = p.strip()
+                stats[p]["Played"] += 1
+                stats[p]["Set Diff"] += (b_sets - a_sets)
+                stats[p]["Point Diff"] += (b_pts - a_pts)
+                if not a_win:
+                    stats[p]["Match Wins"] += 1
+
+    dfp = (
+        pd.DataFrame.from_dict(stats, orient="index")
+        .reset_index()
+        .rename(columns={"index": "Player"})
+    )
+
+    dfp = dfp.sort_values(
+        by=["Match Wins", "Set Diff", "Point Diff", "Played"],
+        ascending=[False, False, False, True]
+    )
+
+    st.dataframe(
+        dfp[["Team","Player","Played","Match Wins","Set Diff","Point Diff"]],
+        width="stretch"
+    )
