@@ -89,11 +89,12 @@ def render_fixture_card(tie, status):
         f"""
         <div style="padding:18px;border-radius:14px;
         border:1px solid #e0e0e0;background:#fafafa;margin-bottom:20px;">
-        <div style="text-align:right;font-size:12px;color:#666">{badge}</div>
+        <div style="text-align:right;font-size:12px;color:#666;">{badge}</div>
         """,
         unsafe_allow_html=True
     )
 
+    # Header: logos + VS
     h1, h2, h3 = st.columns([1, 4, 1])
     with h1:
         show_logo(tie["team_a"], 48)
@@ -113,33 +114,23 @@ def render_fixture_card(tie, status):
 
     st.divider()
 
-   for idx, match in enumerate(tie["matches"], start=1):
-    pair_a, pair_b = match
-
-    st.markdown(
-        f"""
-        <div style="padding:6px 0; line-height:1.6;">
-            <b>M{idx}</b><br>
-            {pair_a}<br>
-            <span style="color:#ff7f0e;">vs</span><br>
-            {pair_b}
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    # ✅ Matches — PLAYER NAMES (VERTICAL, READABLE)
+    for idx, match in enumerate(tie["matches"], start=1):
+        pair_a, pair_b = match
 
         st.markdown(
             f"""
-            <div style="line-height:1.6">
+            <div style="padding:6px 0; line-height:1.6;">
                 <b>M{idx}</b><br>
-                {score}
+                {pair_a}<br>
+                <span style="color:#ff7f0e;">vs</span><br>
+                {pair_b}
             </div>
             """,
             unsafe_allow_html=True
         )
 
     st.markdown("</div>", unsafe_allow_html=True)
-
 # =================================================
 # LOAD FIXTURES
 # =================================================
