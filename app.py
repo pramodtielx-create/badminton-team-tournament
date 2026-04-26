@@ -194,53 +194,58 @@ elif menu == "Fixtures":
                 completed = sum(
                     1 for m in results.get(f["tie_id"], {}).get("matches", []) if m
                 )
+                percent = int((completed / 3) * 100)
 
-                # Card container
-                st.markdown("<div class='card'>", unsafe_allow_html=True)
-
-                # Fixture header
                 st.markdown(
                     f"""
-                    <div style="font-size:16px;font-weight:600;margin-bottom:6px;">
-                        {f["team_a"]}
-                        <span style="color:#F59E0B;"> vs </span>
-                        {f["team_b"]}
+                    <div class="card">
+
+                        <div style="font-size:16px;font-weight:600;margin-bottom:6px;">
+                            {f["team_a"]}
+                            <span style="color:#F59E0B;"> vs </span>
+                            {f["team_b"]}
+                        </div>
+
+                        <div style="font-size:13px;color:#6B7280;margin-bottom:6px;">
+                            {completed} / 3 matches completed
+                        </div>
+
+                        <!-- Progress bar (HTML, fully stylable) -->
+                        <div style="
+                            background:#E5E7EB;
+                            border-radius:6px;
+                            height:8px;
+                            overflow:hidden;
+                            margin-bottom:14px;
+                        ">
+                            <div style="
+                                width:{percent}%;
+                                background:#1F7AED;
+                                height:100%;
+                            "></div>
+                        </div>
+
+                        <hr style="margin:10px 0;">
+
+                        {"".join([
+                            f'''
+                            <div style="padding:6px 0;font-size:14px;">
+                                <strong>M{idx}</strong>
+                                {'✅' if idx <= completed else '⏳'}
+                                <span style="color:#374151;">
+                                    {pa}
+                                    <span style="color:#9CA3AF;">vs</span>
+                                    {pb}
+                                </span>
+                            </div>
+                            '''
+                            for idx, (pa, pb) in enumerate(f["matches"], start=1)
+                        ])}
+
                     </div>
                     """,
                     unsafe_allow_html=True
                 )
-
-                # Completion text
-                st.caption(f"{completed} / 3 matches completed")
-
-                # Progress bar (supporting, not dominant)
-                st.progress(completed / 3)
-
-                # Divider
-                st.markdown("<hr>", unsafe_allow_html=True)
-
-                # Match rows
-                for idx, (pair_a, pair_b) in enumerate(f["matches"], start=1):
-                    status_icon = "✅" if idx <= completed else "⏳"
-
-                    st.markdown(
-                        f"""
-                        <div style="padding:6px 0;font-size:14px;">
-                            <strong>M{idx}</strong> {status_icon}
-                            <span style="color:#374151;">
-                                {pair_a}
-                                <span style="color:#9CA3AF;">vs</span>
-                                {pair_b}
-                            </span>
-                        </div>
-                        """,
-                        unsafe_allow_html=True
-                    )
-
-                # Close card
-                st.markdown("</div>", unsafe_allow_html=True)
-
-
 # =================================================
 # RESULTS
 # =================================================
