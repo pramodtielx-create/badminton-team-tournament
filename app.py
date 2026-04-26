@@ -241,14 +241,15 @@ elif menu == "Fixtures":
     if upcoming:
         st.markdown("## ⏭️ Next Scheduled Fixtures")
         for i in range(0, len(upcoming), 2):
-            cols = st.columns(2)
-            for col, tie in zip(cols, upcoming[i:i+2]):
-               with col:
-    render_fixture_card(
-        tie,
-        "UPCOMING",
-        completed_map.get(tie["tie_id"], [])
-    )
+    cols = st.columns(2)
+
+    for col, tie in zip(cols, upcoming[i:i+2]):
+        with col:
+            render_fixture_card(
+                tie,
+                "UPCOMING",
+                completed_map.get(tie["tie_id"], [])
+            )
 
     if closed:
         st.markdown("## ✅ Closed Fixtures")
@@ -256,7 +257,6 @@ elif menu == "Fixtures":
             cols = st.columns(2)
             for col, tie in zip(cols, closed[i:i+2]):
                 with col:
-                   with col:
     render_fixture_card(
         tie,
         "CLOSED",
