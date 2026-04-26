@@ -1,6 +1,19 @@
 import streamlit as st
 import json
 import os
+import requests
+
+GOOGLE_SCRIPT_URL = st.secrets["SCRIPT_URL"]
+
+def save_result_to_sheet(tie_id, team_a, team_b, match_index, sets):
+    payload = {
+        "tie_id": tie_id,
+        "team_a": team_a,
+        "team_b": team_b,
+        "match_index": match_index,
+        "sets": sets
+    }
+    requests.post(GOOGLE_SCRIPT_URL, json=payload)
 import pandas as pd
 from collections import defaultdict, deque
 def calculate_potm(match_sets, pair_a, pair_b):
@@ -184,12 +197,28 @@ def show_logo(team, width=60):
 # =================================================
 # DATA HELPERS
 # =================================================
-def load_json(path, default):
-    try:
-        with open(path, "r") as f:
-            return json.load(f)
-    except:
-        return default
+def load_results_from_sheet():
+    r = requests.get(GOOGLE_SCRIPT_URL)
+    rows = r.json()
+
+    results = defaultdict(lambda: {
+        "tie_id": None,
+        "team_a": "",
+        "team_b": "",
+        "matches": [{}, {}, {}]
+    })
+
+    for row in rows:
+        tie_id = int(row["tie_id"])
+        results[tie_id]["tie_id"] = tie_id
+        results[tie_id]["team_a"] = row["team_a"]
+        results[tie_id]["team_b"] = row["team_b"]
+
+        results[tie_id]["matches"][int(row["match_index"]) - 1] = {
+            "sets": json.loads(row["sets_json"])
+        }
+
+    return list(results.values())
 
 def save_json(path, data):
     with open(path, "w") as f:
