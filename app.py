@@ -175,6 +175,62 @@ elif menu == "Teams":
             for p in players:
                 st.write(f"• {p}")
 
+def render_fixture_card(tie, status):
+    badge = "🕒 Scheduled" if status == "UPCOMING" else "✅ Completed"
+
+    st.markdown(
+        f"""
+        <div style="
+            padding:18px;
+            border-radius:14px;
+            border:1px solid #e0e0e0;
+            background-color:#fafafa;
+            margin-bottom:18px;
+        ">
+        <div style="text-align:right;font-size:12px;color:#666;">{badge}</div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # Header
+    h1, h2, h3 = st.columns([1, 4, 1])
+    with h1:
+        show_logo(tie["team_a"], 48)
+    with h2:
+        st.markdown(
+            f"""
+            <div style="text-align:center;font-weight:600;">
+                {tie['team_a']}
+                <div style="color:#ff7f0e;font-size:14px;">VS</div>
+                {tie['team_b']}
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    with h3:
+        show_logo(tie["team_b"], 48)
+
+    st.divider()
+
+    # Matches (VERTICAL, READABLE)
+    for idx, match in enumerate(tie["matches"], start=1):
+        st.markdown(
+            f"""
+            <div style="
+                padding:6px 0;
+                font-size:14px;
+                line-height:1.6;
+            ">
+                <b>M{idx}</b><br>
+                {match[0]}<br>
+                <span style="color:#ff7f0e;">vs</span><br>
+                {match[1]}
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    st.markdown("</div>", unsafe_allow_html=True)
 
 # =================================================
 # FIXTURES
@@ -182,65 +238,38 @@ elif menu == "Teams":
 elif menu == "Fixtures":
     st.subheader("📅 Fixtures")
 
-    if not fixtures:
-        st.warning("No fixtures available")
-    else:
-        # ✅ 2 fixtures per row (BEST readability)
-        for i in range(0, len(fixtures), 2):
-            row_fixtures = fixtures[i:i+2]
+    results = load_results_from_sheet()
+    completed_tie_ids = {r["tie_id"] for r in results}
+
+    upcoming = [f for f in fixtures if f["tie_id"] not in completed_tie_ids]
+    completed = [f for f in fixtures if f["tie_id"] in completed_tie_ids]
+
+    # =================================================
+    # NEXT SCHEDULED FIXTURES
+    # =================================================
+    if upcoming:
+        st.markdown("## ⏭️ Next Scheduled Fixtures")
+
+        for i in range(0, len(upcoming), 2):
             cols = st.columns(2)
 
-            for col, tie in zip(cols, row_fixtures):
+            for col, tie in zip(cols, upcoming[i:i+2]):
                 with col:
-                    # ✅ Card container
-                    st.markdown(
-                        """
-                        <div style="
-                            padding:18px;
-                            border-radius:14px;
-                            border:1px solid #e0e0e0;
-                            background-color:#fafafa;
-                            margin-bottom:18px;
-                        ">
-                        """,
-                        unsafe_allow_html=True
-                    )
+                    render_fixture_card(tie, status="UPCOMING")
 
-                    # ✅ Header: logos + VS (centered & aligned)
-                    h1, h2, h3 = st.columns([1, 4, 1])
-                    with h1:
-                        show_logo(tie["team_a"], 48)
-                    with h2:
-                        st.markdown(
-                            f"""
-                            <div style="text-align:center;font-weight:600;">
-                                {tie['team_a']}
-                                <div style="color:#ff7f0e;font-size:14px;">VS</div>
-                                {tie['team_b']}
-                            </div>
-                            """,
-                            unsafe_allow_html=True
-                        )
-                    with h3:
-                        show_logo(tie["team_b"], 48)
+    # =================================================
+    # CLOSED FIXTURES
+    # =================================================
+    if completed:
+        st.markdown("## ✅ Closed Fixtures")
 
-                    st.divider()
+        for i in range(0, len(completed), 2):
+            cols = st.columns(2)
 
-                    # ✅ Matches — spaced & readable
-                    for idx, match in enumerate(tie["matches"], start=1):
-                        st.markdown(
-                            f"""
-                            <div style="font-size:14px; line-height:1.6; margin-bottom:6px;">
-                                <b>M{idx}</b>: {match[0]}<br>
-                                <span style="margin-left:28px;">vs {match[1]}</span>
-                            </div>
-                            """,
-                            unsafe_allow_html=True
-                        )
-
-                    st.markdown("</div>", unsafe_allow_html=True)
-
-
+            for col, tie in zip(cols, completed[i:i+2]):
+                with col:
+                    render_fixture_card(tie, status="CLOSED")
+``
 # =================================================
 # RESULTS
 # =================================================
