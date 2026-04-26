@@ -325,14 +325,16 @@ elif menu == "Player Standings":
         "Played": 0,
         "Match Wins": 0,
         "Set Diff": 0,
-        "Point Diff": 0
+        "Point Diff": 0,
+        "Form": []
     })
 
-    # Initialize all players
+    # ✅ Initialize all players
     for team, players in teams_data.items():
         for p in players:
             stats[p]["Team"] = team
 
+    # ✅ Accumulate match data
     for r in results:
         fixture = next((f for f in fixtures if f["tie_id"] == r["tie_id"]), None)
         if not fixture:
@@ -363,6 +365,7 @@ elif menu == "Player Standings":
                 stats[p]["Played"] += 1
                 stats[p]["Set Diff"] += (a_sets - b_sets)
                 stats[p]["Point Diff"] += (a_pts - b_pts)
+                stats[p]["Form"].append("W" if a_win else "L")
                 if a_win:
                     stats[p]["Match Wins"] += 1
 
@@ -371,21 +374,33 @@ elif menu == "Player Standings":
                 stats[p]["Played"] += 1
                 stats[p]["Set Diff"] += (b_sets - a_sets)
                 stats[p]["Point Diff"] += (b_pts - a_pts)
+                stats[p]["Form"].append("L" if a_win else "W")
                 if not a_win:
                     stats[p]["Match Wins"] += 1
 
+    # ✅ Convert to DataFrame
     dfp = (
         pd.DataFrame.from_dict(stats, orient="index")
         .reset_index()
         .rename(columns={"index": "Player"})
     )
 
+    # ✅ Keep last 5 matches in Form
+    dfp["Form"] = dfp["Form"].apply(lambda x: " ".join(x[-5:]))
+
+    # ✅ Sort (International standard)
     dfp = dfp.sort_values(
         by=["Match Wins", "Set Diff", "Point Diff", "Played"],
         ascending=[False, False, False, True]
-    )
+    ).reset_index(drop=True)
 
+    # ✅ Add explicit Rank column (NO pandas index)
+    dfp.insert(0, "Rank", dfp.index + 1)
+
+    # ✅ Display final table
     st.dataframe(
-        dfp[["Team","Player","Played","Match Wins","Set Diff","Point Diff"]],
+        dfp[
+            ["Rank", "Team", "Player", "Played", "Match Wins", "Set Diff", "Point Diff", "Form"]
+        ],
         width="stretch"
     )
