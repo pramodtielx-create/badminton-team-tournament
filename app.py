@@ -402,6 +402,6 @@ elif menu == "Player Standings":
         dfp[
             ["Rank", "Team", "Player", "Played", "Match Wins", "Set Diff", "Point Diff", "Form"]
         ],
-        width="stretch"
+        width="stretch",
         hide_index=True
     )
