@@ -403,4 +403,5 @@ elif menu == "Player Standings":
             ["Rank", "Team", "Player", "Played", "Match Wins", "Set Diff", "Point Diff", "Form"]
         ],
         width="stretch"
+        hide_index=True
     )
