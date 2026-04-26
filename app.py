@@ -336,9 +336,13 @@ elif menu == "Player Standings":
 
     results = load_results_from_sheet()
 
-    # ---------------------------------
-    # Initialize stats for all players
-    # ---------------------------------
+    if not results:
+        st.warning("No match results available yet.")
+        st.stop()
+
+    # ----------------------------
+    # Initialize players
+    # ----------------------------
     stats = defaultdict(lambda: {
         "Team": "",
         "Played": 0,
@@ -352,29 +356,30 @@ elif menu == "Player Standings":
         for p in players:
             stats[p]["Team"] = team
 
-    # ---------------------------------
-    # Calculate match-wise player stats
-    # ---------------------------------
+    # ----------------------------
+    # Process results
+    # ----------------------------
+    processed_matches = 0
+
     for r in results:
         tie_id = r["tie_id"]
 
-        # Find fixture to know player pairings
         fixture = next((f for f in fixtures if f["tie_id"] == tie_id), None)
-        if not fixture:
+        if fixture is None:
             continue
 
-        for match_index, match_result in enumerate(r["matches"]):
-            if not match_result or "sets" not in match_result:
+        for i, m in enumerate(r["matches"]):
+            if not m or "sets" not in m or not m["sets"]:
                 continue
 
-            sets = match_result["sets"]
+            processed_matches += 1
+            sets = m["sets"]
 
-            pair_a, pair_b = fixture["matches"][match_index]
+            pair_a, pair_b = fixture["matches"][i]
             team_a_players = [p.strip() for p in pair_a.split("/")]
             team_b_players = [p.strip() for p in pair_b.split("/")]
 
             a_sets = b_sets = a_pts = b_pts = 0
-
             for a, b in sets:
                 a_pts += a
                 b_pts += b
@@ -385,7 +390,6 @@ elif menu == "Player Standings":
 
             a_win = a_sets > b_sets
 
-            # Team A players
             for p in team_a_players:
                 stats[p]["Played"] += 1
                 stats[p]["Set Diff"] += (a_sets - b_sets)
@@ -394,7 +398,6 @@ elif menu == "Player Standings":
                 if a_win:
                     stats[p]["Match Wins"] += 1
 
-            # Team B players
             for p in team_b_players:
                 stats[p]["Played"] += 1
                 stats[p]["Set Diff"] += (b_sets - a_sets)
@@ -403,19 +406,45 @@ elif menu == "Player Standings":
                 if not a_win:
                     stats[p]["Match Wins"] += 1
 
-    # ---------------------------------
-    # Build DataFrame
-    # ---------------------------------
+    if processed_matches == 0:
+        st.warning("Results exist but no completed matches were found.")
+        st.stop()
+
+    # ----------------------------
+    # Build table
+    # ----------------------------
     df = (
         pd.DataFrame.from_dict(stats, orient="index")
         .reset_index()
         .rename(columns={"index": "Player"})
     )
 
-    # Keep last 5 matches only for Form
     df["Form"] = df["Form"].apply(lambda x: " ".join(x[-5:]))
 
-    # ---------------------------------
+    df = df.sort_values(
+        by=["Match Wins", "Set Diff", "Point Diff", "Played"],
+        ascending=[False, False, False, True]
+    ).reset_index(drop=True)
+
+    df.insert(0, "Rank", df.index + 1)
+
+    st.dataframe(
+        df[
+            [
+                "Rank",
+                "Team",
+                "Player",
+                "Played",
+                "Match Wins",
+                "Set Diff",
+                "Point Diff",
+                "Form",
+            ]
+        ],
+        hide_index=True,
+        width="stretch"
+    )
+
 
 # =================================================
 # ADMIN LOGIN
