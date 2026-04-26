@@ -222,6 +222,7 @@ elif menu == "Fixtures":
 
     results = load_results_from_sheet()
 
+    # Map tie_id -> completed matches
     completed_map = {}
     for r in results:
         done = []
@@ -230,7 +231,8 @@ elif menu == "Fixtures":
                 done.append(idx)
         completed_map[r["tie_id"]] = done
 
-    upcoming, closed = [], []
+    upcoming = []
+    closed = []
 
     for f in fixtures:
         if len(completed_map.get(f["tie_id"], [])) == 3:
@@ -238,31 +240,39 @@ elif menu == "Fixtures":
         else:
             upcoming.append(f)
 
+    # ===============================
+    # NEXT / IN-PROGRESS FIXTURES
+    # ===============================
     if upcoming:
         st.markdown("## ⏭️ Next Scheduled Fixtures")
+
         for i in range(0, len(upcoming), 2):
-    cols = st.columns(2)
+            cols = st.columns(2)
 
-    for col, tie in zip(cols, upcoming[i:i+2]):
-        with col:
-            render_fixture_card(
-                tie,
-                "UPCOMING",
-                completed_map.get(tie["tie_id"], [])
-            )
+            for col, tie in zip(cols, upcoming[i:i+2]):
+                with col:
+                    render_fixture_card(
+                        tie,
+                        "UPCOMING",
+                        completed_map.get(tie["tie_id"], [])
+                    )
 
+    # ===============================
+    # CLOSED FIXTURES
+    # ===============================
     if closed:
         st.markdown("## ✅ Closed Fixtures")
+
         for i in range(0, len(closed), 2):
             cols = st.columns(2)
+
             for col, tie in zip(cols, closed[i:i+2]):
                 with col:
-    render_fixture_card(
-        tie,
-        "CLOSED",
-        completed_map.get(tie["tie_id"], [])
-    )
-
+                    render_fixture_card(
+                        tie,
+                        "CLOSED",
+                        completed_map.get(tie["tie_id"], [])
+                    )
 
 # =================================================
 # TEAM STANDINGS
