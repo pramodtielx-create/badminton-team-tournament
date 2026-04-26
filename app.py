@@ -113,12 +113,21 @@ def render_fixture_card(tie, status):
 
     st.divider()
 
-    for idx, match in enumerate(tie["matches"], start=1):
-        if not match or "sets" not in match:
-            st.markdown(f"<b>M{idx}</b>: —", unsafe_allow_html=True)
-            continue
+   for idx, match in enumerate(tie["matches"], start=1):
+    pair_a, pair_b = match
 
-        score = " | ".join(f"{a}-{b}" for a, b in match["sets"])
+    st.markdown(
+        f"""
+        <div style="padding:6px 0; line-height:1.6;">
+            <b>M{idx}</b><br>
+            {pair_a}<br>
+            <span style="color:#ff7f0e;">vs</span><br>
+            {pair_b}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
         st.markdown(
             f"""
             <div style="line-height:1.6">
@@ -151,8 +160,10 @@ menu = st.radio(
         "Home",
         "Teams",
         "Fixtures",
+        "Results",
         "Team Standings",
         "Player Standings",
+        "Enter Results",
         "Admin Login"
     ],
     horizontal=True
