@@ -239,7 +239,7 @@ elif menu == "Fixtures":
 
                 # Close card
                 st.markdown("</div>", unsafe_allow_html=True)
-``
+
 
 # =================================================
 # RESULTS
