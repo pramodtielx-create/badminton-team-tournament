@@ -83,29 +83,40 @@ if menu == "Overview":
 # FIXTURES (FULLY HTML – CSS GUARANTEED)
 # =================================================
 elif menu == "Fixtures":
+    import streamlit.components.v1 as components
+
+    st.subheader("Fixtures")
+
     results = load_results()
 
     html = """
     <style>
-        body { font-family: Inter, Segoe UI, sans-serif; }
         .grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 24px;
         }
         .card {
-            background: white;
+            background: #ffffff;
             border: 1px solid #e5e7eb;
             border-radius: 14px;
             padding: 20px;
+            font-family: Inter, Segoe UI, sans-serif;
         }
         .title {
             font-size: 16px;
             font-weight: 600;
             margin-bottom: 4px;
         }
-        .vs { color: #f59e0b; padding: 0 4px; }
-        .meta { font-size: 13px; color: #6b7280; margin-bottom: 6px; }
+        .vs {
+            color: #f59e0b;
+            padding: 0 4px;
+        }
+        .meta {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 6px;
+        }
         .progress {
             background: #e5e7eb;
             height: 8px;
@@ -127,35 +138,52 @@ elif menu == "Fixtures":
             color: #374151;
         }
     </style>
+
     <div class="grid">
     """
 
     for f in fixtures:
-        completed = sum(
-            1 for m in results.get(f["tie_id"], {}).get("matches", []) if m
+        tie_id = f["tie_id"]
+        match_results = results.get(tie_id, {}).get("matches", [])
+
+        # ✅ Correct completed count (order‑independent)
+        completed_count = sum(
+            1 for m in match_results if m and "sets" in m
         )
-        pct = int((completed / 3) * 100)
+
+        percent = int((completed_count / 3) * 100)
 
         html += f"""
         <div class="card">
             <div class="title">
                 {f["team_a"]}<span class="vs">vs</span>{f["team_b"]}
             </div>
-            <div class="meta">{completed} / 3 matches completed</div>
+            <div class="meta">{completed_count} / 3 matches completed</div>
 
             <div class="progress">
-                <div class="bar" style="width:{pct}%"></div>
+                <div class="bar" style="width:{percent}%"></div>
             </div>
 
             <div class="divider"></div>
         """
 
-        for i, (pa, pb) in enumerate(f["matches"], start=1):
-            icon = "✅" if i <= completed else "⏳"
+        # ✅ Per‑match completion check (THIS FIXES YOUR BUG)
+        for idx, (pair_a, pair_b) in enumerate(f["matches"]):
+            match_number = idx + 1
+
+            match_data = (
+                match_results[idx]
+                if idx < len(match_results)
+                else None
+            )
+
+            is_completed = bool(match_data and "sets" in match_data)
+            status_icon = "✅" if is_completed else "⏳"
+
             html += f"""
             <div class="row">
-                <strong>M{i}</strong> {icon}
-                {pa} <span class="vs">vs</span> {pb}
+                <strong>M{match_number}</strong> {status_icon}
+                {pair_a} <span class="vs">vs</span> {pair_b}
             </div>
             """
 
@@ -163,7 +191,7 @@ elif menu == "Fixtures":
 
     html += "</div>"
 
-    components.html(html, height=1400, scrolling=True)
+    components.html(html, height=1200, scrolling=True)
 
 # =================================================
 # RESULTS
