@@ -125,6 +125,38 @@ fixtures = load_json("data/fixtures.json", [])
 if "is_admin" not in st.session_state:
     st.session_state.is_admin = False
 
+elif menu == "Admin Login":
+    st.subheader("🔐 Admin Login")
+
+    # ✅ Safety initialization
+    if "is_admin" not in st.session_state:
+        st.session_state.is_admin = False
+
+    st.write("DEBUG: is_admin =", st.session_state.is_admin)
+
+    if st.session_state.is_admin:
+        st.success("✅ Logged in as Admin")
+
+        if st.button("Logout"):
+            st.session_state.is_admin = False
+            st.rerun()
+
+    else:
+        try:
+            admin_pwd = st.secrets["ADMIN_PASSWORD"]
+        except KeyError:
+            st.error("❌ ADMIN_PASSWORD not found in Streamlit Secrets")
+            st.stop()
+
+        pwd = st.text_input("Admin Password", type="password")
+
+        if st.button("Login"):
+            if pwd == admin_pwd:
+                st.session_state.is_admin = True
+                st.success("✅ Login successful")
+                st.rerun()
+            else:
+                st.error("❌ Incorrect password")
 # =================================================
 # MENU
 # =================================================
