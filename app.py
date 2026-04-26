@@ -26,8 +26,9 @@ def load_json(path, default):
 # =================================================
 # GOOGLE SHEETS HELPERS (RESULTS)
 # =================================================
-def save_result_to_sheet(tie_id, team_a, team_b, match_index, sets):
+def save_result_to_sheet(round_no, tie_id, team_a, team_b, match_index, sets):
     payload = {
+        "round_no": round_no,
         "tie_id": tie_id,
         "team_a": team_a,
         "team_b": team_b,
@@ -40,7 +41,12 @@ def load_results_from_sheet():
     r = requests.get(GOOGLE_SCRIPT_URL)
     rows = r.json()
 
+    if isinstance(rows, dict) and "error" in rows:
+        st.error(rows["error"])
+        return []
+
     results = defaultdict(lambda: {
+        "round": None,
         "tie_id": None,
         "team_a": "",
         "team_b": "",
@@ -49,6 +55,7 @@ def load_results_from_sheet():
 
     for row in rows:
         tie_id = int(row["tie_id"])
+        results[tie_id]["round"] = int(row["round_no"])
         results[tie_id]["tie_id"] = tie_id
         results[tie_id]["team_a"] = row["team_a"]
         results[tie_id]["team_b"] = row["team_b"]
@@ -57,7 +64,6 @@ def load_results_from_sheet():
         }
 
     return list(results.values())
-
 # =================================================
 # PLAYER OF MATCH LOGIC
 # =================================================
