@@ -239,37 +239,44 @@ elif menu == "Fixtures":
     st.subheader("📅 Fixtures")
 
     results = load_results_from_sheet()
-    completed_tie_ids = {r["tie_id"] for r in results}
 
-    upcoming = [f for f in fixtures if f["tie_id"] not in completed_tie_ids]
-    completed = [f for f in fixtures if f["tie_id"] in completed_tie_ids]
+    completed_matches_by_tie = {}
+    for r in results:
+        tie_id = r["tie_id"]
+        done = []
+        for idx, m in enumerate(r["matches"], start=1):
+            if m and "sets" in m and m["sets"]:
+                done.append(idx)
+        completed_matches_by_tie[tie_id] = done
 
-    # =================================================
-    # NEXT SCHEDULED FIXTURES
-    # =================================================
+    upcoming = []
+    completed = []
+
+    for f in fixtures:
+        tie_id = f["tie_id"]
+        if len(completed_matches_by_tie.get(tie_id, [])) == 3:
+            completed.append(f)
+        else:
+            upcoming.append(f)
+
+    # NEXT SCHEDULED / IN‑PROGRESS
     if upcoming:
         st.markdown("## ⏭️ Next Scheduled Fixtures")
-
         for i in range(0, len(upcoming), 2):
             cols = st.columns(2)
-
             for col, tie in zip(cols, upcoming[i:i+2]):
                 with col:
                     render_fixture_card(tie, status="UPCOMING")
 
-    # =================================================
-    # CLOSED FIXTURES
-    # =================================================
+    # CLOSED
     if completed:
         st.markdown("## ✅ Closed Fixtures")
-
         for i in range(0, len(completed), 2):
             cols = st.columns(2)
-
             for col, tie in zip(cols, completed[i:i+2]):
                 with col:
                     render_fixture_card(tie, status="CLOSED")
-
+``
 # =================================================
 # RESULTS
 # =================================================
