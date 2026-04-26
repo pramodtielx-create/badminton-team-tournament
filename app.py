@@ -175,62 +175,7 @@ elif menu == "Teams":
             for p in players:
                 st.write(f"• {p}")
 
-def render_fixture_card(tie, status):
-    badge = "🕒 Scheduled" if status == "UPCOMING" else "✅ Completed"
 
-    st.markdown(
-        f"""
-        <div style="
-            padding:18px;
-            border-radius:14px;
-            border:1px solid #e0e0e0;
-            background-color:#fafafa;
-            margin-bottom:18px;
-        ">
-        <div style="text-align:right;font-size:12px;color:#666;">{badge}</div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    # Header
-    h1, h2, h3 = st.columns([1, 4, 1])
-    with h1:
-        show_logo(tie["team_a"], 48)
-    with h2:
-        st.markdown(
-            f"""
-            <div style="text-align:center;font-weight:600;">
-                {tie['team_a']}
-                <div style="color:#ff7f0e;font-size:14px;">VS</div>
-                {tie['team_b']}
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-    with h3:
-        show_logo(tie["team_b"], 48)
-
-    st.divider()
-
-    # Matches (VERTICAL, READABLE)
-    for idx, match in enumerate(tie["matches"], start=1):
-        st.markdown(
-            f"""
-            <div style="
-                padding:6px 0;
-                font-size:14px;
-                line-height:1.6;
-            ">
-                <b>M{idx}</b><br>
-                {match[0]}<br>
-                <span style="color:#ff7f0e;">vs</span><br>
-                {match[1]}
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-    st.markdown("</div>", unsafe_allow_html=True)
 
 # =================================================
 # FIXTURES
