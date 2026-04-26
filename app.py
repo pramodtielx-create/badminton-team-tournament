@@ -362,7 +362,6 @@ elif menu == "Results":
     if not results:
         st.info("No results have been entered yet.")
     else:
-        # Show 2 result cards per row
         for i in range(0, len(results), 2):
             cols = st.columns(2)
 
@@ -373,7 +372,7 @@ elif menu == "Results":
                     if not fixture:
                         continue
 
-                    # Card container
+                    # Card
                     st.markdown(
                         """
                         <div style="
@@ -387,32 +386,32 @@ elif menu == "Results":
                         unsafe_allow_html=True
                     )
 
-                    # Header: logos + team names
+                    # Header: Logos + team names
                     left, mid, right = st.columns([3, 1, 3])
 
                     with left:
                         show_logo(fixture["team_a"], 50)
                         st.markdown(
-                            f"<div style='text-align:center; font-weight:600;'>{fixture['team_a']}</div>",
+                            f"<div style='text-align:center;font-weight:600;'>{fixture['team_a']}</div>",
                             unsafe_allow_html=True
                         )
 
                     with mid:
                         st.markdown(
-                            "<div style='text-align:center; font-weight:700; margin-top:22px; color:#ff7f0e;'>VS</div>",
+                            "<div style='text-align:center;font-weight:700;color:#ff7f0e;margin-top:22px;'>VS</div>",
                             unsafe_allow_html=True
                         )
 
                     with right:
                         show_logo(fixture["team_b"], 50)
                         st.markdown(
-                            f"<div style='text-align:center; font-weight:600;'>{fixture['team_b']}</div>",
+                            f"<div style='text-align:center;font-weight:600;'>{fixture['team_b']}</div>",
                             unsafe_allow_html=True
                         )
 
                     st.divider()
 
-                    # Matches and scores
+                    # Matches
                     for idx, match in enumerate(r["matches"], start=1):
                         pair_a, pair_b = fixture["matches"][idx - 1]
 
@@ -445,7 +444,6 @@ elif menu == "Results":
                             )
 
                     st.markdown("</div>", unsafe_allow_html=True)
-
 # =================================================
 # =================================================
 # TEAM STANDINGS
