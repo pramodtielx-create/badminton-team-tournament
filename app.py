@@ -159,19 +159,73 @@ elif menu == "Fixtures":
 # RESULTS
 # =================================================
 elif menu == "Results":
-    st.subheader("Results")
-    results = load_results()
-    for tid, r in results.items():
-        f = next(x for x in fixtures if x["tie_id"] == tid)
-        st.write(f"**{f['team_a']} vs {f['team_b']}**")
-        for i, m in enumerate(r["matches"], start=1):
-            if m:
-                score = " | ".join(f"{a}-{b}" for a, b in m["sets"])
-                st.write(f"M{i}: {score}")
-            else:
-                st.write(f"M{i}: Pending")
-        st.divider()
+    import streamlit.components.v1 as components
 
+    results = load_results()
+
+    html = """
+    <style>
+        .result-card {
+            background:#ffffff;
+            border:1px solid #e5e7eb;
+            border-radius:14px;
+            padding:18px;
+            margin-bottom:20px;
+        }
+        .match {
+            padding:6px 0;
+            font-size:14px;
+        }
+        .winner {
+            color:#16a34a;
+            font-weight:600;
+        }
+        .loser {
+            color:#6b7280;
+        }
+        .score {
+            font-weight:600;
+            margin-left:6px;
+        }
+    </style>
+    """
+
+    for tid, r in results.items():
+        f = next(fx for fx in fixtures if fx["tie_id"] == tid)
+
+        html += f"""
+        <div class="result-card">
+            <div style="font-size:16px;font-weight:600;margin-bottom:8px;">
+                {f['team_a']} vs {f['team_b']}
+            </div>
+        """
+
+        for idx, m in enumerate(r["matches"], start=1):
+            if not m:
+                html += f"<div class='match'>M{idx}: Pending</div>"
+                continue
+
+            a_sets = sum(1 for a,b in m["sets"] if a>b)
+            b_sets = len(m["sets"]) - a_sets
+            score = " | ".join(f"{a}-{b}" for a,b in m["sets"])
+
+            win_class = "winner" if a_sets > b_sets else "loser"
+            lose_class = "loser" if a_sets > b_sets else "winner"
+
+            pA, pB = f["matches"][idx-1]
+
+            html += f"""
+            <div class="match">
+                <span class="{win_class}">{pA}</span>
+                vs
+                <span class="{lose_class}">{pB}</span>
+                <span class="score">({score})</span>
+            </div>
+            """
+
+        html += "</div>"
+
+    components.html(html, height=900, scrolling=True)
 # =================================================
 # TEAM STANDINGS (BASIC, STABLE)
 # =================================================
