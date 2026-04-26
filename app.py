@@ -38,11 +38,38 @@ def save_result_to_sheet(round_no, tie_id, team_a, team_b, match_index, sets):
     requests.post(GOOGLE_SCRIPT_URL, json=payload)
 
 def load_results_from_sheet():
-    r = requests.get(GOOGLE_SCRIPT_URL)
-    rows = r.json()
+    try:
+        r = requests.get(GOOGLE_SCRIPT_URL, timeout=10)
+    except Exception as e:
+        st.error(f"❌ Failed to reach Google Sheets API: {e}")
+        return []
 
+    # ✅ Always inspect response first
+    text = r.text.strip()
+
+    # Debug visibility (remove later if you want)
+    st.write("Sheets HTTP status:", r.status_code)
+    st.write("Sheets raw response (first 300 chars):", text[:300])
+
+    if not text:
+        st.error("❌ Google Sheets API returned EMPTY response")
+        return []
+
+    if not (text.startswith("{") or text.startswith("[")):
+        st.error("❌ Google Sheets API did NOT return JSON")
+        st.code(text[:500])
+        return []
+
+    try:
+        rows = json.loads(text)
+    except Exception as e:
+        st.error(f"❌ JSON parsing failed: {e}")
+        st.code(text[:500])
+        return []
+
+    # ✅ Handle error payloads from Apps Script
     if isinstance(rows, dict) and "error" in rows:
-        st.error(rows["error"])
+        st.error(f"❌ Apps Script error: {rows['error']}")
         return []
 
     results = defaultdict(lambda: {
@@ -55,10 +82,12 @@ def load_results_from_sheet():
 
     for row in rows:
         tie_id = int(row["tie_id"])
+
         results[tie_id]["round"] = int(row["round_no"])
         results[tie_id]["tie_id"] = tie_id
         results[tie_id]["team_a"] = row["team_a"]
         results[tie_id]["team_b"] = row["team_b"]
+
         results[tie_id]["matches"][int(row["match_index"]) - 1] = {
             "sets": json.loads(row["sets_json"])
         }
