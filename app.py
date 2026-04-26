@@ -205,23 +205,29 @@ elif menu == "Fixtures":
 # RESULTS
 # =================================================
 elif menu == "Results":
+    st.subheader("Results")
+
     results = load_results()
 
-    for tid, r in results.items():
-        f = next(x for x in fixtures if x["tie_id"] == tid)
-
-        st.markdown("<div class='card'>", unsafe_allow_html=True)
-        st.write(f"**{f['team_a']} vs {f['team_b']}**")
-
-       for i, m in enumerate(r["matches"], 1):
-    if not m:
-        st.write(f"M{i}: Pending")
+    if not results:
+        st.info("No results available yet.")
     else:
-        score = " | ".join(f"{a}-{b}" for a, b in m["sets"])
-        st.write(f"M{i}: {score}")
+        for tid, r in results.items():
+            fixture = next((f for f in fixtures if f["tie_id"] == tid), None)
+            if not fixture:
+                continue
 
-        st.markdown("</div>", unsafe_allow_html=True)
+            st.markdown("<div class='card'>", unsafe_allow_html=True)
+            st.write(f"**{fixture['team_a']} vs {fixture['team_b']}**")
 
+            for i, m in enumerate(r["matches"], start=1):
+                if not m:
+                    st.write(f"M{i}: Pending")
+                else:
+                    score = " | ".join(f"{a}-{b}" for a, b in m["sets"])
+                    st.write(f"M{i}: {score}")
+
+            st.markdown("</div>", unsafe_allow_html=True)
 # =================================================
 # TEAM STANDINGS (INTERNATIONAL)
 # =================================================
