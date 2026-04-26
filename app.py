@@ -182,23 +182,62 @@ if menu == "Overview":
 # FIXTURES (2 CARDS PER ROW)
 # =================================================
 elif menu == "Fixtures":
+    st.subheader("Fixtures")
+
     results = load_results()
 
     for i in range(0, len(fixtures), 2):
         cols = st.columns(2)
+
         for col, f in zip(cols, fixtures[i:i+2]):
             with col:
-                done = sum(1 for m in results.get(f["tie_id"], {}).get("matches", []) if m)
+                done = sum(
+                    1 for m in results.get(f["tie_id"], {}).get("matches", []) if m
+                )
 
+                # Card container
                 st.markdown("<div class='card'>", unsafe_allow_html=True)
-                st.write(f"**{f['team_a']}**  vs  **{f['team_b']}**")
 
+                # Header
+                st.markdown(
+                    f"""
+                    <div style="font-size:16px;font-weight:600;margin-bottom:4px;">
+                        {f["team_a"]}
+                        <span style="color:#F59E0B;">vs</span>
+                        {f["team_b"]}
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+                # Status text
                 st.caption(f"{done} / 3 matches completed")
+
+                # Progress bar (secondary)
                 st.progress(done / 3)
 
-                for idx, (pa, pb) in enumerate(f["matches"], 1):
-                    st.write(f"**M{idx}** · {pa} vs {pb}")
+                # Divider
+                st.markdown("<hr>", unsafe_allow_html=True)
 
+                # Match rows
+                for idx, (pa, pb) in enumerate(f["matches"], start=1):
+                    status_icon = "✅" if idx <= done else "⏳"
+
+                    st.markdown(
+                        f"""
+                        <div style="padding:6px 0;font-size:14px;">
+                            <strong>M{idx}</strong> {status_icon}
+                            <span style="color:#374151;">
+                                {pa}
+                                <span style="color:#9CA3AF;">vs</span>
+                                {pb}
+                            </span>
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
+
+                # Close card
                 st.markdown("</div>", unsafe_allow_html=True)
 
 # =================================================
