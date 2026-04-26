@@ -1,8 +1,10 @@
 import streamlit as st
 import streamlit.components.v1 as components
+import pandas as pd
 import json
 import requests
 from collections import defaultdict
+
 
 # After imports, before menu
 components.html("""
