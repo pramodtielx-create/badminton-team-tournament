@@ -185,30 +185,61 @@ elif menu == "Fixtures":
     if not fixtures:
         st.warning("No fixtures available")
     else:
-        # ✅ Show 3 fixtures per row
         for i in range(0, len(fixtures), 3):
             row_fixtures = fixtures[i:i+3]
             cols = st.columns(3)
 
             for col, tie in zip(cols, row_fixtures):
                 with col:
-                    # ✅ Team A
-                    c1, c2, c3 = st.columns([1, 4, 1])
-                    with c1:
-                        show_logo(tie["team_a"], 50)
-                    with c2:
+                    # ✅ Card container
+                    st.markdown(
+                        """
+                        <div style="
+                            padding:16px;
+                            border-radius:12px;
+                            border:1px solid #ddd;
+                            margin-bottom:16px;
+                            background-color:#fafafa;
+                        ">
+                        """,
+                        unsafe_allow_html=True
+                    )
+
+                    # ✅ Header: logos + VS
+                    h1, h2, h3 = st.columns([1, 3, 1])
+                    with h1:
+                        show_logo(tie["team_a"], 45)
+                    with h2:
                         st.markdown(
-                            f"**{tie['team_a']}**  \n🆚  \n**{tie['team_b']}**",
+                            f"<div style='text-align:center; font-weight:600;'>"
+                            f"{tie['team_a']}<br>"
+                            f"<span style='color:#ff7f0e;'>VS</span><br>"
+                            f"{tie['team_b']}"
+                            f"</div>",
                             unsafe_allow_html=True
                         )
-                    with c3:
-                        show_logo(tie["team_b"], 50)
+                    with h3:
+                        show_logo(tie["team_b"], 45)
 
                     st.divider()
 
-                    # ✅ Matches
+                    # ✅ Matches (stacked, clean)
                     for idx, match in enumerate(tie["matches"], start=1):
-                        st.write(f"Match {idx}: {match[0]} vs {match[1]}")
+                        st.markdown(
+                            f"""
+                            <div style="
+                                font-size:13px;
+                                line-height:1.4;
+                                margin-bottom:6px;
+                            ">
+                                <b>M{idx}</b>: {match[0]}<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;vs {match[1]}
+                            </div>
+                            """,
+                            unsafe_allow_html=True
+                        )
+
+                    st.markdown("</div>", unsafe_allow_html=True)
 
 # =================================================
 # RESULTS
