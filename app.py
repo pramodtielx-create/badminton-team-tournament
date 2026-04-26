@@ -352,18 +352,101 @@ for idx, match in enumerate(r["matches"], start=1):
 
     score = " | ".join(f"{a}-{b}" for a, b in match["sets"])
 
-    st.markdown(
-        f"""
-        <div style="padding:8px 0;">
-            <b>M{idx}</b><br>
-            {pair_a} <span style="color:#ff7f0e;">vs</span> {pair_b}<br>
-            <b>{score}</b>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+ ############################################################
 
-st.markdown("</div>", unsafe_allow_html=True)
+elif menu == "Results":
+    st.subheader("🏆 Results")
+
+    results = load_results_from_sheet()
+
+    if not results:
+        st.info("No results have been entered yet.")
+    else:
+        # Show 2 result cards per row
+        for i in range(0, len(results), 2):
+            cols = st.columns(2)
+
+            for col, r in zip(cols, results[i:i+2]):
+                with col:
+                    tie_id = r["tie_id"]
+                    fixture = next((f for f in fixtures if f["tie_id"] == tie_id), None)
+                    if not fixture:
+                        continue
+
+                    # Card container
+                    st.markdown(
+                        """
+                        <div style="
+                            padding:18px;
+                            border-radius:14px;
+                            border:1px solid #e0e0e0;
+                            background:#fafafa;
+                            margin-bottom:20px;
+                        ">
+                        """,
+                        unsafe_allow_html=True
+                    )
+
+                    # Header: logos + team names
+                    left, mid, right = st.columns([3, 1, 3])
+
+                    with left:
+                        show_logo(fixture["team_a"], 50)
+                        st.markdown(
+                            f"<div style='text-align:center; font-weight:600;'>{fixture['team_a']}</div>",
+                            unsafe_allow_html=True
+                        )
+
+                    with mid:
+                        st.markdown(
+                            "<div style='text-align:center; font-weight:700; margin-top:22px; color:#ff7f0e;'>VS</div>",
+                            unsafe_allow_html=True
+                        )
+
+                    with right:
+                        show_logo(fixture["team_b"], 50)
+                        st.markdown(
+                            f"<div style='text-align:center; font-weight:600;'>{fixture['team_b']}</div>",
+                            unsafe_allow_html=True
+                        )
+
+                    st.divider()
+
+                    # Matches and scores
+                    for idx, match in enumerate(r["matches"], start=1):
+                        pair_a, pair_b = fixture["matches"][idx - 1]
+
+                        if not match or "sets" not in match or not match["sets"]:
+                            st.markdown(
+                                f"""
+                                <div style="padding:8px 0; opacity:0.5;">
+                                    <b>M{idx}</b><br>
+                                    {pair_a}<br>
+                                    <span style="color:#ff7f0e;">vs</span><br>
+                                    {pair_b}<br>
+                                    <i>Not played yet</i>
+                                </div>
+                                """,
+                                unsafe_allow_html=True
+                            )
+                        else:
+                            score = " | ".join(f"{a}-{b}" for a, b in match["sets"])
+                            st.markdown(
+                                f"""
+                                <div style="padding:8px 0;">
+                                    <b>M{idx}</b><br>
+                                    {pair_a}<br>
+                                    <span style="color:#ff7f0e;">vs</span><br>
+                                    {pair_b}<br>
+                                    <b>{score}</b>
+                                </div>
+                                """,
+                                unsafe_allow_html=True
+                            )
+
+                    st.markdown("</div>", unsafe_allow_html=True)
+
+################################################################
 # =================================================
 # TEAM STANDINGS
 # =================================================
