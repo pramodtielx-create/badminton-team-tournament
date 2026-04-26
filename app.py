@@ -217,7 +217,7 @@ elif menu == "Results":
             if not m:
                 st.write(f"M{i}: Pending")
             else:
-                score=" | ".join(f\"{a}-{b}\" for a,b in m["sets"])
+               score = " | ".join(f"{a}-{b}" for a, b in m["sets"])
                 st.write(f"M{i}: {score}")
 
         st.markdown("</div>", unsafe_allow_html=True)
