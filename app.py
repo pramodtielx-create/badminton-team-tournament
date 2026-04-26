@@ -191,46 +191,46 @@ elif menu == "Fixtures":
 
         for col, f in zip(cols, fixtures[i:i+2]):
             with col:
-                done = sum(
+                completed = sum(
                     1 for m in results.get(f["tie_id"], {}).get("matches", []) if m
                 )
 
                 # Card container
                 st.markdown("<div class='card'>", unsafe_allow_html=True)
 
-                # Header
+                # Fixture header
                 st.markdown(
                     f"""
-                    <div style="font-size:16px;font-weight:600;margin-bottom:4px;">
+                    <div style="font-size:16px;font-weight:600;margin-bottom:6px;">
                         {f["team_a"]}
-                        <span style="color:#F59E0B;">vs</span>
+                        <span style="color:#F59E0B;"> vs </span>
                         {f["team_b"]}
                     </div>
                     """,
                     unsafe_allow_html=True
                 )
 
-                # Status text
-                st.caption(f"{done} / 3 matches completed")
+                # Completion text
+                st.caption(f"{completed} / 3 matches completed")
 
-                # Progress bar (secondary)
-                st.progress(done / 3)
+                # Progress bar (supporting, not dominant)
+                st.progress(completed / 3)
 
                 # Divider
                 st.markdown("<hr>", unsafe_allow_html=True)
 
                 # Match rows
-                for idx, (pa, pb) in enumerate(f["matches"], start=1):
-                    status_icon = "✅" if idx <= done else "⏳"
+                for idx, (pair_a, pair_b) in enumerate(f["matches"], start=1):
+                    status_icon = "✅" if idx <= completed else "⏳"
 
                     st.markdown(
                         f"""
                         <div style="padding:6px 0;font-size:14px;">
                             <strong>M{idx}</strong> {status_icon}
                             <span style="color:#374151;">
-                                {pa}
+                                {pair_a}
                                 <span style="color:#9CA3AF;">vs</span>
-                                {pb}
+                                {pair_b}
                             </span>
                         </div>
                         """,
@@ -239,6 +239,7 @@ elif menu == "Fixtures":
 
                 # Close card
                 st.markdown("</div>", unsafe_allow_html=True)
+``
 
 # =================================================
 # RESULTS
