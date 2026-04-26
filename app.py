@@ -185,9 +185,10 @@ elif menu == "Fixtures":
     if not fixtures:
         st.warning("No fixtures available")
     else:
-        for i in range(0, len(fixtures), 3):
-            row_fixtures = fixtures[i:i+3]
-            cols = st.columns(3)
+        # ✅ 2 fixtures per row (BEST readability)
+        for i in range(0, len(fixtures), 2):
+            row_fixtures = fixtures[i:i+2]
+            cols = st.columns(2)
 
             for col, tie in zip(cols, row_fixtures):
                 with col:
@@ -195,51 +196,50 @@ elif menu == "Fixtures":
                     st.markdown(
                         """
                         <div style="
-                            padding:16px;
-                            border-radius:12px;
-                            border:1px solid #ddd;
-                            margin-bottom:16px;
+                            padding:18px;
+                            border-radius:14px;
+                            border:1px solid #e0e0e0;
                             background-color:#fafafa;
+                            margin-bottom:18px;
                         ">
                         """,
                         unsafe_allow_html=True
                     )
 
-                    # ✅ Header: logos + VS
-                    h1, h2, h3 = st.columns([1, 3, 1])
+                    # ✅ Header: logos + VS (centered & aligned)
+                    h1, h2, h3 = st.columns([1, 4, 1])
                     with h1:
-                        show_logo(tie["team_a"], 45)
+                        show_logo(tie["team_a"], 48)
                     with h2:
                         st.markdown(
-                            f"<div style='text-align:center; font-weight:600;'>"
-                            f"{tie['team_a']}<br>"
-                            f"<span style='color:#ff7f0e;'>VS</span><br>"
-                            f"{tie['team_b']}"
-                            f"</div>",
+                            f"""
+                            <div style="text-align:center;font-weight:600;">
+                                {tie['team_a']}
+                                <div style="color:#ff7f0e;font-size:14px;">VS</div>
+                                {tie['team_b']}
+                            </div>
+                            """,
                             unsafe_allow_html=True
                         )
                     with h3:
-                        show_logo(tie["team_b"], 45)
+                        show_logo(tie["team_b"], 48)
 
                     st.divider()
 
-                    # ✅ Matches (stacked, clean)
+                    # ✅ Matches — spaced & readable
                     for idx, match in enumerate(tie["matches"], start=1):
                         st.markdown(
                             f"""
-                            <div style="
-                                font-size:13px;
-                                line-height:1.4;
-                                margin-bottom:6px;
-                            ">
+                            <div style="font-size:14px; line-height:1.6; margin-bottom:6px;">
                                 <b>M{idx}</b>: {match[0]}<br>
-                                &nbsp;&nbsp;&nbsp;&nbsp;vs {match[1]}
+                                <span style="margin-left:28px;">vs {match[1]}</span>
                             </div>
                             """,
                             unsafe_allow_html=True
                         )
 
                     st.markdown("</div>", unsafe_allow_html=True)
+
 
 # =================================================
 # RESULTS
