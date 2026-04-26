@@ -180,11 +180,35 @@ elif menu == "Teams":
 # FIXTURES
 # =================================================
 elif menu == "Fixtures":
-    for tie in fixtures:
-        st.subheader(f"Tie {tie['tie_id']} — {tie['team_a']} vs {tie['team_b']}")
-        for i, m in enumerate(tie["matches"], 1):
-            st.write(f"Match {i}: {m[0]} vs {m[1]}")
-        st.divider()
+    st.subheader("📅 Fixtures")
+
+    if not fixtures:
+        st.warning("No fixtures available")
+    else:
+        # ✅ Show 3 fixtures per row
+        for i in range(0, len(fixtures), 3):
+            row_fixtures = fixtures[i:i+3]
+            cols = st.columns(3)
+
+            for col, tie in zip(cols, row_fixtures):
+                with col:
+                    # ✅ Team A
+                    c1, c2, c3 = st.columns([1, 4, 1])
+                    with c1:
+                        show_logo(tie["team_a"], 50)
+                    with c2:
+                        st.markdown(
+                            f"**{tie['team_a']}**  \n🆚  \n**{tie['team_b']}**",
+                            unsafe_allow_html=True
+                        )
+                    with c3:
+                        show_logo(tie["team_b"], 50)
+
+                    st.divider()
+
+                    # ✅ Matches
+                    for idx, match in enumerate(tie["matches"], start=1):
+                        st.write(f"Match {idx}: {match[0]} vs {match[1]}")
 
 # =================================================
 # RESULTS
