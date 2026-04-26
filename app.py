@@ -275,27 +275,7 @@ elif menu == "Fixtures":
                     )
 
 
-elif menu == "Results":
-    st.subheader("🏆 Results")
-
-    results = load_results_from_sheet()
-
-    if not results:
-        st.info("No results have been entered yet.")
-        st.stop()
-
-    # Show 2 result cards per row
-    for i in range(0, len(results), 2):
-        cols = st.columns(2)
-
-        for col, r in zip(cols, results[i:i+2]):
-            with col:
-                tie_id = r["tie_id"]
-                fixture = next((f for f in fixtures if f["tie_id"] == tie_id), None)
-                if not fixture:
-                    continue
-
-             # -------------------------
+# -------------------------
 # Card container
 # -------------------------
 st.markdown(
@@ -320,7 +300,7 @@ with left:
     st.markdown(
         f"""
         <div style="text-align:center;">
-            <img src="{team_logos[fixture['team_a']]}" width="60"><br>
+            {team_logos[fixture['team_a']]}<br>
             <b>{fixture['team_a']}</b>
         </div>
         """,
@@ -342,7 +322,7 @@ with right:
     st.markdown(
         f"""
         <div style="text-align:center;">
-            <img src="{team_logos[fixture['team_b']]}" width="60"><br>
+            {team_logos[fixture['team_b']]}<br>
             <b>{fixture['team_b']}</b>
         </div>
         """,
@@ -384,44 +364,6 @@ for idx, match in enumerate(r["matches"], start=1):
     )
 
 st.markdown("</div>", unsafe_allow_html=True)
-
-                # -------------------------
-                # Matches + Scores
-                # -------------------------
-                for idx, match in enumerate(r["matches"], start=1):
-                    pair_a, pair_b = fixture["matches"][idx - 1]
-
-                    if not match or "sets" not in match or not match["sets"]:
-                        st.markdown(
-                            f"""
-                            <div style="padding:8px 0; opacity:0.5;">
-                                <b>M{idx}</b><br>
-                                {pair_a}<br>
-                                <span style="color:#ff7f0e;">vs</span><br>
-                                {pair_b}<br>
-                                <i>Not played yet</i>
-                            </div>
-                            """,
-                            unsafe_allow_html=True
-                        )
-                        continue
-
-                    score = " | ".join(f"{a}-{b}" for a, b in match["sets"])
-
-                    st.markdown(
-                        f"""
-                        <div style="padding:8px 0;">
-                            <b>M{idx}</b><br>
-                            {pair_a}<br>
-                            <span style="color:#ff7f0e;">vs</span><br>
-                            {pair_b}<br>
-                            <b>{score}</b>
-                        </div>
-                        """,
-                        unsafe_allow_html=True
-                    )
-
-                st.markdown("</div>", unsafe_allow_html=True)
 # =================================================
 # TEAM STANDINGS
 # =================================================
