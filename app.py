@@ -238,151 +238,160 @@ elif menu == "Results":
 # TEAM STANDINGS (BASIC, STABLE)
 # =================================================
 elif menu == "Team Standings":
-    import streamlit.components.v1 as components
-    from collections import defaultdict
+    st.subheader("🏆 Team Standings")
 
     results = load_results()
-    table = defaultdict(lambda: {"Pts":0,"W":0,"SetΔ":0,"PtΔ":0})
 
-    for tid,r in results.items():
-        f = next(x for x in fixtures if x["tie_id"]==tid)
+    table = defaultdict(lambda: {
+        "Played": 0,
+        "Wins": 0,
+        "Losses": 0,
+        "Sets Won": 0,
+        "Sets Lost": 0,
+        "Points Won": 0,
+        "Points Lost": 0,
+        "Form": []
+    })
+
+    for tid, r in results.items():
+        fixture = next(f for f in fixtures if f["tie_id"] == tid)
+        team_a = fixture["team_a"]
+        team_b = fixture["team_b"]
 
         for m in r["matches"]:
-            if not m: continue
-            a_s=b_s=a_p=b_p=0
-            for a,b in m["sets"]:
-                a_p+=a; b_p+=b
-                a_s+=a>b; b_s+=b>a
+            if not m:
+                continue
 
-            if a_s>b_s:
-                table[f["team_a"]]["Pts"]+=2
-                table[f["team_a"]]["W"]+=1
+            a_sets = b_sets = a_pts = b_pts = 0
+            for a, b in m["sets"]:
+                a_pts += a
+                b_pts += b
+                if a > b:
+                    a_sets += 1
+                else:
+                    b_sets += 1
+
+            # Played
+            table[team_a]["Played"] += 1
+            table[team_b]["Played"] += 1
+
+            # Sets & points
+            table[team_a]["Sets Won"] += a_sets
+            table[team_a]["Sets Lost"] += b_sets
+            table[team_b]["Sets Won"] += b_sets
+            table[team_b]["Sets Lost"] += a_sets
+
+            table[team_a]["Points Won"] += a_pts
+            table[team_a]["Points Lost"] += b_pts
+            table[team_b]["Points Won"] += b_pts
+            table[team_b]["Points Lost"] += a_pts
+
+            # Win / loss
+            if a_sets > b_sets:
+                table[team_a]["Wins"] += 1
+                table[team_b]["Losses"] += 1
+                table[team_a]["Form"].append("W")
+                table[team_b]["Form"].append("L")
             else:
-                table[f["team_b"]]["Pts"]+=2
-                table[f["team_b"]]["W"]+=1
+                table[team_b]["Wins"] += 1
+                table[team_a]["Losses"] += 1
+                table[team_b]["Form"].append("W")
+                table[team_a]["Form"].append("L")
 
-            table[f["team_a"]]["SetΔ"]+=a_s-b_s
-            table[f["team_b"]]["SetΔ"]+=b_s-a_s
-            table[f["team_a"]]["PtΔ"]+=a_p-b_p
-            table[f["team_b"]]["PtΔ"]+=b_p-a_p
+    # Build DataFrame
 
-    ordered = sorted(
-        table.items(),
-        key=lambda x:(x[1]["Pts"],x[1]["W"],x[1]["SetΔ"],x[1]["PtΔ"]),
-        reverse=True
-    )
-
-    html = """
-    <style>
-        .team-card {
-            border:1px solid #e5e7eb;
-            border-radius:12px;
-            padding:14px;
-            margin-bottom:12px;
-        }
-        .leader {
-            background:#fff7ed;
-            border-color:#f59e0b;
-        }
-        .row {
-            display:flex;
-            justify-content:space-between;
-            font-size:14px;
-        }
-    </style>
-    """
-
-    for i,(team,data) in enumerate(ordered, start=1):
-        cls = "team-card leader" if i==1 else "team-card"
-        html += f"""
-        <div class="{cls}">
-            <div style="font-weight:600;margin-bottom:6px;">#{i} {team}</div>
-            <div class="row">
-                <span>Pts: {data['Pts']}</span>
-                <span>W: {data['W']}</span>
-                <span>SetΔ: {data['SetΔ']}</span>
-            </div>
-        </div>
-        """
-
-    components.html(html, height=800)
 
 # =================================================
 # PLAYER STANDINGS
 # =================================================
 elif menu == "Player Standings":
-    import streamlit.components.v1 as components
-    from collections import defaultdict
+    st.subheader("👤 Player Standings")
 
     results = load_results()
-    stats = defaultdict(lambda:{"Team":"","W":0,"P":0,"Form":[]})
 
-    for t, players in teams_data.items():
+    stats = defaultdict(lambda: {
+        "Team": "",
+        "Played": 0,
+        "Wins": 0,
+        "Losses": 0,
+        "Sets Won": 0,
+        "Sets Lost": 0,
+        "Points Won": 0,
+        "Points Lost": 0,
+        "Form": []
+    })
+
+    # Assign teams
+    for team, players in teams_data.items():
         for p in players:
-            stats[p]["Team"]=t
+            stats[p]["Team"] = team
 
-    for tid,r in results.items():
-        f = next(x for x in fixtures if x["tie_id"]==tid)
+    for tid, r in results.items():
+        fixture = next(f for f in fixtures if f["tie_id"] == tid)
 
-        for i,m in enumerate(r["matches"]):
-            if not m: continue
-            A=[x.strip() for x in f["matches"][i][0].split("/")]
-            B=[x.strip() for x in f["matches"][i][1].split("/")]
+        for idx, m in enumerate(r["matches"]):
+            if not m:
+                continue
 
-            a_s=sum(1 for a,b in m["sets"] if a>b)
-            b_s=len(m["sets"])-a_s
+            pair_a, pair_b = fixture["matches"][idx]
+            team_a_players = [p.strip() for p in pair_a.split("/")]
+            team_b_players = [p.strip() for p in pair_b.split("/")]
 
-            for p in A:
-                stats[p]["P"]+=1
-                stats[p]["Form"].append("W" if a_s>b_s else "L")
-                if a_s>b_s: stats[p]["W"]+=1
-            for p in B:
-                stats[p]["P"]+=1
-                stats[p]["Form"].append("W" if b_s>a_s else "L")
-                if b_s>a_s: stats[p]["W"]+=1
+            a_sets = b_sets = a_pts = b_pts = 0
+            for a, b in m["sets"]:
+                a_pts += a
+                b_pts += b
+                if a > b:
+                    a_sets += 1
+                else:
+                    b_sets += 1
 
-    ordered = sorted(
-        stats.items(),
-        key=lambda x:(x[1]["W"],-x[1]["P"]),
-        reverse=True
+            # Team A players
+            for p in team_a_players:
+                stats[p]["Played"] += 1
+                stats[p]["Sets Won"] += a_sets
+                stats[p]["Sets Lost"] += b_sets
+                stats[p]["Points Won"] += a_pts
+                stats[p]["Points Lost"] += b_pts
+                if a_sets > b_sets:
+                    stats[p]["Wins"] += 1
+                    stats[p]["Form"].append("W")
+                else:
+                    stats[p]["Losses"] += 1
+                    stats[p]["Form"].append("L")
+
+            # Team B players
+            for p in team_b_players:
+                stats[p]["Played"] += 1
+                stats[p]["Sets Won"] += b_sets
+                stats[p]["Sets Lost"] += a_sets
+                stats[p]["Points Won"] += b_pts
+                stats[p]["Points Lost"] += a_pts
+                if b_sets > a_sets:
+                    stats[p]["Wins"] += 1
+                    stats[p]["Form"].append("W")
+                else:
+                    stats[p]["Losses"] += 1
+                    stats[p]["Form"].append("L")
+
+    # Build DataFrame
+    df = pd.DataFrame.from_dict(stats, orient="index")
+    df["Set Diff"] = df["Sets Won"] - df["Sets Lost"]
+    df["Point Diff"] = df["Points Won"] - df["Points Lost"]
+    df["Recent Form"] = df["Form"].apply(lambda x: " ".join(x[-5:]))
+
+    df = df.drop(columns=["Form"])
+
+    df = df.sort_values(
+        by=["Wins", "Set Diff", "Point Diff", "Played"],
+        ascending=[False, False, False, True]
     )
 
-    html = """
-    <style>
-        .player {
-            border:1px solid #e5e7eb;
-            border-radius:12px;
-            padding:12px;
-            margin-bottom:10px;
-            font-size:14px;
-        }
-        .pill {
-            display:inline-block;
-            padding:2px 8px;
-            border-radius:999px;
-            font-size:12px;
-            margin-right:4px;
-        }
-        .W {background:#dcfce7;color:#166534;}
-        .L {background:#fee2e2;color:#991b1b;}
-    </style>
-    """
+    df.insert(0, "Rank", range(1, len(df) + 1))
 
-    for rank,(p,d) in enumerate(ordered, start=1):
-        forms=" ".join(
-            f"<span class='pill {x}'>{x}</span>"
-            for x in d["Form"][-5:]
-        )
+    st.dataframe(df.reset_index().rename(columns={"index": "Player"}),
+                 use_container_width=True)
 
-        html += f"""
-        <div class="player">
-            <strong>#{rank} {p}</strong> ({d['Team']})<br>
-            Wins: {d['W']} | Played: {d['P']}<br>
-            {forms}
-        </div>
-        """
-
-    components.html(html, height=900, scrolling=True)
 # =================================================
 # INSIGHTS
 # =================================================
