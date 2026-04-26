@@ -269,7 +269,7 @@ elif menu == "Fixtures":
             for col, tie in zip(cols, completed[i:i+2]):
                 with col:
                     render_fixture_card(tie, status="CLOSED")
-``
+
 # =================================================
 # RESULTS
 # =================================================
