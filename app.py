@@ -244,6 +244,10 @@ elif menu == "Team Standings":
 
     results = load_results()
 
+    if not results:
+        st.info("No completed team matches yet.")
+        st.stop()
+
     table = defaultdict(lambda: {
         "Played": 0,
         "Wins": 0,
@@ -256,15 +260,20 @@ elif menu == "Team Standings":
     })
 
     for tid, r in results.items():
-        fixture = next(f for f in fixtures if f["tie_id"] == tid)
+        # Find matching fixture
+        fixture = next((f for f in fixtures if f["tie_id"] == tid), None)
+        if not fixture:
+            continue
+
         team_a = fixture["team_a"]
         team_b = fixture["team_b"]
 
         for m in r["matches"]:
-            if not m:
+            if not m or "sets" not in m:
                 continue
 
             a_sets = b_sets = a_pts = b_pts = 0
+
             for a, b in m["sets"]:
                 a_pts += a
                 b_pts += b
@@ -277,18 +286,19 @@ elif menu == "Team Standings":
             table[team_a]["Played"] += 1
             table[team_b]["Played"] += 1
 
-            # Sets & points
+            # Sets
             table[team_a]["Sets Won"] += a_sets
             table[team_a]["Sets Lost"] += b_sets
             table[team_b]["Sets Won"] += b_sets
             table[team_b]["Sets Lost"] += a_sets
 
+            # Points
             table[team_a]["Points Won"] += a_pts
             table[team_a]["Points Lost"] += b_pts
             table[team_b]["Points Won"] += b_pts
             table[team_b]["Points Lost"] += a_pts
 
-            # Win / loss
+            # Result
             if a_sets > b_sets:
                 table[team_a]["Wins"] += 1
                 table[team_b]["Losses"] += 1
@@ -301,7 +311,28 @@ elif menu == "Team Standings":
                 table[team_a]["Form"].append("L")
 
     # Build DataFrame
+    df = pd.DataFrame.from_dict(table, orient="index")
 
+    if df.empty:
+        st.warning("Team results exist but no completed matches found.")
+        st.stop()
+
+    df["Set Diff"] = df["Sets Won"] - df["Sets Lost"]
+    df["Point Diff"] = df["Points Won"] - df["Points Lost"]
+    df["League Points"] = df["Wins"] * 2
+    df["Recent Form"] = df["Form"].apply(lambda x: " ".join(x[-5:]))
+
+    df = df.drop(columns=["Form"])
+
+    # International sorting
+    df = df.sort_values(
+        by=["League Points", "Wins", "Set Diff", "Point Diff"],
+        ascending=False
+    )
+
+    df.insert(0, "Rank", range(1, len(df) + 1))
+
+    st.dataframe(df, use_container_width=True)
 
 # =================================================
 # PLAYER STANDINGS
