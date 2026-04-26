@@ -154,12 +154,27 @@ if menu == "Home":
 # TEAMS
 # =================================================
 elif menu == "Teams":
-    for t, players in teams_data.items():
-        show_logo(t, 80)
-        st.subheader(t)
-        for p in players:
-            st.write("•", p)
-        st.divider()
+    st.subheader("🏸 Teams")
+
+    team_items = list(teams_data.items())
+
+    # ✅ Create 4 columns (one per team)
+    cols = st.columns(4)
+
+    for idx, (team, players) in enumerate(team_items):
+        with cols[idx]:
+            # ✅ Team logo
+            show_logo(team, width=100)
+
+            # ✅ Team name
+            st.markdown(f"### {team}")
+
+            st.divider()
+
+            # ✅ Player list
+            for p in players:
+                st.write(f"• {p}")
+
 
 # =================================================
 # FIXTURES
