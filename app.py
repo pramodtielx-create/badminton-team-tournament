@@ -82,22 +82,39 @@ def load_results_from_sheet():
 # =================================================
 # FIXTURE CARD RENDER
 # =================================================
-def render_fixture_card(tie, status):
+def render_fixture_card(tie, status, completed_matches):
+    """
+    tie               : fixture dict from fixtures.json
+    status            : 'UPCOMING' or 'CLOSED'
+    completed_matches : list of completed match indices, e.g. [1, 3]
+    """
+
     badge = "🕒 Scheduled / In‑Progress" if status == "UPCOMING" else "✅ Closed"
 
+    # =========================
+    # Card container
+    # =========================
     st.markdown(
         f"""
-        <div style="padding:18px;border-radius:14px;
-        border:1px solid #e0e0e0;background:#fafafa;margin-bottom:20px;">
+        <div style="
+            padding:18px;
+            border-radius:14px;
+            border:1px solid #e0e0e0;
+            background:#fafafa;
+            margin-bottom:20px;
+        ">
         <div style="text-align:right;font-size:12px;color:#666;">{badge}</div>
         """,
         unsafe_allow_html=True
     )
 
-    # Header: logos + VS
+    # =========================
+    # Header: logos + teams
+    # =========================
     h1, h2, h3 = st.columns([1, 4, 1])
     with h1:
         show_logo(tie["team_a"], 48)
+
     with h2:
         st.markdown(
             f"""
@@ -109,28 +126,23 @@ def render_fixture_card(tie, status):
             """,
             unsafe_allow_html=True
         )
+
     with h3:
         show_logo(tie["team_b"], 48)
 
     st.divider()
 
-    # ✅ Matches — PLAYER NAMES (VERTICAL, READABLE)
+    # =========================
+    # Matches (M1 / M2 / M3)
+    # =========================
     for idx, match in enumerate(tie["matches"], start=1):
         pair_a, pair_b = match
 
-        st.markdown(
-            f"""
-            <div style="padding:6px 0; line-height:1.6;">
-                <b>M{idx}</b><br>
-                {pair_a}<br>
-                <span style="color:#ff7f0e;">vs</span><br>
-                {pair_b}
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        if idx in completed_matches:
+            icon = "✅"
+            subtitle = "Completed"
+            opacity = "1.0"
 
-    st.markdown("</div>", unsafe_allow_html=True)
 # =================================================
 # LOAD FIXTURES
 # =================================================
