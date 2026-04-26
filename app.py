@@ -228,15 +228,195 @@ elif menu == "Results":
                 st.markdown("</div>", unsafe_allow_html=True)
 
 # =================================================
+# =================================================
 # TEAM STANDINGS
 # =================================================
 elif menu == "Team Standings":
-    st.subheader("League Standings")
-    st.info("Standings generated from results data.")
+    st.subheader("📊 Team Standings")
+
+    results = load_results_from_sheet()
+    table = defaultdict(lambda: {
+        "Matches": 0,
+        "Wins": 0,
+        "Losses": 0,
+        "Set Diff": 0,
+        "Point Diff": 0,
+        "Points": 0
+    })
+
+    for r in results:
+        ta, tb = r["team_a"], r["team_b"]
+        for m in r["matches"]:
+            if not m or "sets" not in m:
+                continue
+
+            a_sets = b_sets = a_pts = b_pts = 0
+            for a, b in m["sets"]:
+                a_pts += a
+                b_pts += b
+                if a > b:
+                    a_sets += 1
+                else:
+                    b_sets += 1
+
+            table[ta]["Matches"] += 1
+            table[tb]["Matches"] += 1
+            table[ta]["Set Diff"] += (a_sets - b_sets)
+            table[tb]["Set Diff"] += (b_sets - a_sets)
+            table[ta]["Point Diff"] += (a_pts - b_pts)
+            table[tb]["Point Diff"] += (b_pts - a_pts)
+
+            if a_sets > b_sets:
+                table[ta]["Wins"] += 1
+                table[tb]["Losses"] += 1
+            else:
+                table[tb]["Wins"] += 1
+                table[ta]["Losses"] += 1
+
+    for t in table:
+        table[t]["Points"] = table[t]["Wins"] * 2
+
+    df = pd.DataFrame.from_dict(table, orient="index").sort_values(
+        by=["Points", "Set Diff", "Point Diff"], ascending=False
+    )
+
+    st.dataframe(df, width="stretch")
 
 # =================================================
 # PLAYER STANDINGS
 # =================================================
 elif menu == "Player Standings":
-    st.subheader("Player Performance Rankings")
-    st.info("Player‑level analytics derived from completed matches.")
+    st.subheader("👤 Player Standings")
+
+    results = load_results_from_sheet()
+
+    if not results:
+        st.warning("No match results available yet.")
+        st.stop()
+
+    # ----------------------------
+    # Initialize players
+    # ----------------------------
+    stats = defaultdict(lambda: {
+        "Team": "",
+        "Played": 0,
+        "Match Wins": 0,
+        "Set Diff": 0,
+        "Point Diff": 0,
+        "Form": []
+    })
+
+    for team, players in teams_data.items():
+        for p in players:
+            stats[p]["Team"] = team
+
+    # ----------------------------
+    # Process results
+    # ----------------------------
+    processed_matches = 0
+
+    for r in results:
+        tie_id = r["tie_id"]
+
+        fixture = next((f for f in fixtures if f["tie_id"] == tie_id), None)
+        if fixture is None:
+            continue
+
+        for i, m in enumerate(r["matches"]):
+            if not m or "sets" not in m or not m["sets"]:
+                continue
+
+            processed_matches += 1
+            sets = m["sets"]
+
+            pair_a, pair_b = fixture["matches"][i]
+            team_a_players = [p.strip() for p in pair_a.split("/")]
+            team_b_players = [p.strip() for p in pair_b.split("/")]
+
+            a_sets = b_sets = a_pts = b_pts = 0
+            for a, b in sets:
+                a_pts += a
+                b_pts += b
+                if a > b:
+                    a_sets += 1
+                else:
+                    b_sets += 1
+
+            a_win = a_sets > b_sets
+
+            for p in team_a_players:
+                stats[p]["Played"] += 1
+                stats[p]["Set Diff"] += (a_sets - b_sets)
+                stats[p]["Point Diff"] += (a_pts - b_pts)
+                stats[p]["Form"].append("W" if a_win else "L")
+                if a_win:
+                    stats[p]["Match Wins"] += 1
+
+            for p in team_b_players:
+                stats[p]["Played"] += 1
+                stats[p]["Set Diff"] += (b_sets - a_sets)
+                stats[p]["Point Diff"] += (b_pts - a_pts)
+                stats[p]["Form"].append("L" if a_win else "W")
+                if not a_win:
+                    stats[p]["Match Wins"] += 1
+
+    if processed_matches == 0:
+        st.warning("Results exist but no completed matches were found.")
+        st.stop()
+
+    # ----------------------------
+    # Build table
+    # ----------------------------
+    df = (
+        pd.DataFrame.from_dict(stats, orient="index")
+        .reset_index()
+        .rename(columns={"index": "Player"})
+    )
+
+    df["Form"] = df["Form"].apply(lambda x: " ".join(x[-5:]))
+
+    df = df.sort_values(
+        by=["Match Wins", "Set Diff", "Point Diff", "Played"],
+        ascending=[False, False, False, True]
+    ).reset_index(drop=True)
+
+    df.insert(0, "Rank", df.index + 1)
+
+    st.dataframe(
+        df[
+            [
+                "Rank",
+                "Team",
+                "Player",
+                "Played",
+                "Match Wins",
+                "Set Diff",
+                "Point Diff",
+                "Form",
+            ]
+        ],
+        hide_index=True,
+        width="stretch"
+    )
+
+
+# =================================================
+# ADMIN LOGIN
+# =================================================
+elif menu == "Admin Login":
+    st.subheader("🔐 Admin Login")
+
+    if st.session_state.is_admin:
+        st.success("✅ Logged in as Admin")
+        if st.button("Logout"):
+            st.session_state.is_admin = False
+            st.rerun()
+    else:
+        pwd = st.text_input("Admin Password", type="password")
+        if st.button("Login"):
+            if pwd == ADMIN_PASSWORD:
+                st.session_state.is_admin = True
+                st.success("✅ Login successful")
+                st.rerun()
+            else:
+                st.error("❌ Incorrect password")
