@@ -220,6 +220,7 @@ def load_results_from_sheet():
 
     return list(results.values())
 
+
 def save_json(path, data):
     with open(path, "w") as f:
         json.dump(data, f, indent=2)
@@ -227,6 +228,14 @@ def save_json(path, data):
 fixtures = load_json("data/fixtures.json", [])
 results = load_json("data/results.json", [])
 final_result = load_json("data/final_result.json", {})
+
+
+def load_json(path, default):
+    try:
+        with open(path, "r") as f:
+            return json.load(f)
+    except:
+        return default
 
 # =================================================
 # MENU
