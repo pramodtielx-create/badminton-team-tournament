@@ -213,12 +213,12 @@ elif menu == "Results":
         st.markdown("<div class='card'>", unsafe_allow_html=True)
         st.write(f"**{f['team_a']} vs {f['team_b']}**")
 
-        for i, m in enumerate(r["matches"], 1):
-            if not m:
-                st.write(f"M{i}: Pending")
-            else:
-               score = " | ".join(f"{a}-{b}" for a, b in m["sets"])
-                st.write(f"M{i}: {score}")
+       for i, m in enumerate(r["matches"], 1):
+    if not m:
+        st.write(f"M{i}: Pending")
+    else:
+        score = " | ".join(f"{a}-{b}" for a, b in m["sets"])
+        st.write(f"M{i}: {score}")
 
         st.markdown("</div>", unsafe_allow_html=True)
 
