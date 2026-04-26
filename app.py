@@ -334,7 +334,88 @@ elif menu == "Team Standings":
 elif menu == "Player Standings":
     st.subheader("👤 Player Standings")
 
-    st.info("Player standings logic already verified earlier")
+    results = load_results_from_sheet()
+
+    # ---------------------------------
+    # Initialize stats for all players
+    # ---------------------------------
+    stats = defaultdict(lambda: {
+        "Team": "",
+        "Played": 0,
+        "Match Wins": 0,
+        "Set Diff": 0,
+        "Point Diff": 0,
+        "Form": []
+    })
+
+    for team, players in teams_data.items():
+        for p in players:
+            stats[p]["Team"] = team
+
+    # ---------------------------------
+    # Calculate match-wise player stats
+    # ---------------------------------
+    for r in results:
+        tie_id = r["tie_id"]
+
+        # Find fixture to know player pairings
+        fixture = next((f for f in fixtures if f["tie_id"] == tie_id), None)
+        if not fixture:
+            continue
+
+        for match_index, match_result in enumerate(r["matches"]):
+            if not match_result or "sets" not in match_result:
+                continue
+
+            sets = match_result["sets"]
+
+            pair_a, pair_b = fixture["matches"][match_index]
+            team_a_players = [p.strip() for p in pair_a.split("/")]
+            team_b_players = [p.strip() for p in pair_b.split("/")]
+
+            a_sets = b_sets = a_pts = b_pts = 0
+
+            for a, b in sets:
+                a_pts += a
+                b_pts += b
+                if a > b:
+                    a_sets += 1
+                else:
+                    b_sets += 1
+
+            a_win = a_sets > b_sets
+
+            # Team A players
+            for p in team_a_players:
+                stats[p]["Played"] += 1
+                stats[p]["Set Diff"] += (a_sets - b_sets)
+                stats[p]["Point Diff"] += (a_pts - b_pts)
+                stats[p]["Form"].append("W" if a_win else "L")
+                if a_win:
+                    stats[p]["Match Wins"] += 1
+
+            # Team B players
+            for p in team_b_players:
+                stats[p]["Played"] += 1
+                stats[p]["Set Diff"] += (b_sets - a_sets)
+                stats[p]["Point Diff"] += (b_pts - a_pts)
+                stats[p]["Form"].append("L" if a_win else "W")
+                if not a_win:
+                    stats[p]["Match Wins"] += 1
+
+    # ---------------------------------
+    # Build DataFrame
+    # ---------------------------------
+    df = (
+        pd.DataFrame.from_dict(stats, orient="index")
+        .reset_index()
+        .rename(columns={"index": "Player"})
+    )
+
+    # Keep last 5 matches only for Form
+    df["Form"] = df["Form"].apply(lambda x: " ".join(x[-5:]))
+
+    # ---------------------------------
 
 # =================================================
 # ADMIN LOGIN
