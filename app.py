@@ -90,11 +90,10 @@ elif menu == "Fixtures":
 
     results = load_results()
 
-    # ✅ Group fixtures by round
+    # Group fixtures by round
     fixtures_by_round = defaultdict(list)
     for f in fixtures:
-        round_no = f.get("Round", 1)  # default to Round 1 if missing
-        fixtures_by_round[round_no].append(f)
+        fixtures_by_round[f["Round"]].append(f)
 
     html = """
     <style>
@@ -111,9 +110,9 @@ elif menu == "Fixtures":
             font-family: Inter, Segoe UI, sans-serif;
         }
         .round-title {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 700;
-            margin: 20px 0 10px;
+            margin: 25px 0 12px;
         }
         .title {
             font-size: 16px;
@@ -152,7 +151,7 @@ elif menu == "Fixtures":
     </style>
     """
 
-    # ✅ Render round by round
+    # Render all rounds
     for round_no in sorted(fixtures_by_round.keys()):
         html += f'<div class="round-title">🏁 Round {round_no}</div>'
         html += '<div class="grid">'
@@ -161,7 +160,7 @@ elif menu == "Fixtures":
             tie_id = f["tie_id"]
             match_results = results.get(tie_id, {}).get("matches", [])
 
-            # ✅ Correct completed count
+            # Count completed matches
             completed_count = sum(
                 1 for m in match_results if m and "sets" in m
             )
@@ -182,6 +181,7 @@ elif menu == "Fixtures":
                 <div class="divider"></div>
             """
 
+            # Per-match rows
             for idx, (pair_a, pair_b) in enumerate(f["matches"]):
                 match_number = idx + 1
 
@@ -205,7 +205,8 @@ elif menu == "Fixtures":
 
         html += "</div>"
 
-    components.html(html, height=1600, scrolling=True)
+    components.html(html, height=1700, scrolling=True)
+
 # =================================================
 # RESULTS
 # =================================================
