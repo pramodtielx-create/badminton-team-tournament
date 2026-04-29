@@ -84,10 +84,17 @@ if menu == "Overview":
 # =================================================
 elif menu == "Fixtures":
     import streamlit.components.v1 as components
+    from collections import defaultdict
 
     st.subheader("Fixtures")
 
     results = load_results()
+
+    # ✅ Group fixtures by round
+    fixtures_by_round = defaultdict(list)
+    for f in fixtures:
+        round_no = f.get("Round", 1)  # default to Round 1 if missing
+        fixtures_by_round[round_no].append(f)
 
     html = """
     <style>
@@ -102,6 +109,11 @@ elif menu == "Fixtures":
             border-radius: 14px;
             padding: 20px;
             font-family: Inter, Segoe UI, sans-serif;
+        }
+        .round-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 20px 0 10px;
         }
         .title {
             font-size: 16px;
@@ -138,61 +150,62 @@ elif menu == "Fixtures":
             color: #374151;
         }
     </style>
-
-    <div class="grid">
     """
 
-    for f in fixtures:
-        tie_id = f["tie_id"]
-        match_results = results.get(tie_id, {}).get("matches", [])
+    # ✅ Render round by round
+    for round_no in sorted(fixtures_by_round.keys()):
+        html += f'<div class="round-title">🏁 Round {round_no}</div>'
+        html += '<div class="grid">'
 
-        # ✅ Correct completed count (order‑independent)
-        completed_count = sum(
-            1 for m in match_results if m and "sets" in m
-        )
+        for f in fixtures_by_round[round_no]:
+            tie_id = f["tie_id"]
+            match_results = results.get(tie_id, {}).get("matches", [])
 
-        percent = int((completed_count / 3) * 100)
-
-        html += f"""
-        <div class="card">
-            <div class="title">
-                {f["team_a"]}<span class="vs">vs</span>{f["team_b"]}
-            </div>
-            <div class="meta">{completed_count} / 3 matches completed</div>
-
-            <div class="progress">
-                <div class="bar" style="width:{percent}%"></div>
-            </div>
-
-            <div class="divider"></div>
-        """
-
-        # ✅ Per‑match completion check (THIS FIXES YOUR BUG)
-        for idx, (pair_a, pair_b) in enumerate(f["matches"]):
-            match_number = idx + 1
-
-            match_data = (
-                match_results[idx]
-                if idx < len(match_results)
-                else None
+            # ✅ Correct completed count
+            completed_count = sum(
+                1 for m in match_results if m and "sets" in m
             )
 
-            is_completed = bool(match_data and "sets" in match_data)
-            status_icon = "✅" if is_completed else "⏳"
+            percent = int((completed_count / 3) * 100)
 
             html += f"""
-            <div class="row">
-                <strong>M{match_number}</strong> {status_icon}
-                {pair_a} <span class="vs">vs</span> {pair_b}
-            </div>
+            <div class="card">
+                <div class="title">
+                    {f["team_a"]}<span class="vs">vs</span>{f["team_b"]}
+                </div>
+                <div class="meta">{completed_count} / 3 matches completed</div>
+
+                <div class="progress">
+                    <div class="bar" style="width:{percent}%"></div>
+                </div>
+
+                <div class="divider"></div>
             """
+
+            for idx, (pair_a, pair_b) in enumerate(f["matches"]):
+                match_number = idx + 1
+
+                match_data = (
+                    match_results[idx]
+                    if idx < len(match_results)
+                    else None
+                )
+
+                is_completed = bool(match_data and "sets" in match_data)
+                status_icon = "✅" if is_completed else "⏳"
+
+                html += f"""
+                <div class="row">
+                    <strong>M{match_number}</strong> {status_icon}
+                    {pair_a} <span class="vs">vs</span> {pair_b}
+                </div>
+                """
+
+            html += "</div>"
 
         html += "</div>"
 
-    html += "</div>"
-
-    components.html(html, height=1200, scrolling=True)
-
+    components.html(html, height=1600, scrolling=True)
 # =================================================
 # RESULTS
 # =================================================
