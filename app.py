@@ -490,5 +490,80 @@ elif menu == "Player Standings":
 # INSIGHTS
 # =================================================
 elif menu == "Insights":
-    st.subheader("Insights")
-    st.info("Data‑driven insights generated from fixtures and results.")
+    st.subheader("📊 Insights")
+    st.info("Data‑driven insights generated from fixtures and match results.")
+
+    results = load_results()
+
+    if not results:
+        st.warning("No match data available yet.")
+    else:
+        st.markdown("## 🔥 Match Highlights")
+
+        closest_match = None
+        closest_margin = float("inf")
+
+        for tid, r in results.items():
+            fixture = next(f for f in fixtures if f["tie_id"] == tid)
+            st.markdown("---")
+            st.markdown(f"### 🆚 Tie: {fixture.get('title', tid)}")
+
+            for idx, m in enumerate(r["matches"]):
+                if not m:
+                    continue
+
+                pair_a, pair_b = fixture["matches"][idx]
+                sets = m["sets"]
+
+                a_sets = b_sets = 0
+                a_pts = b_pts = 0
+
+                # Track per‑player points
+                player_points = {}
+
+                for a, b in sets:
+                    a_pts += a
+                    b_pts += b
+                    if a > b:
+                        a_sets += 1
+                    else:
+                        b_sets += 1
+
+                # Identify winner
+                winner = pair_a if a_sets > b_sets else pair_b
+                margin = abs(a_sets - b_sets)
+
+                # Determine highlight label
+                highlight = "🔥 Dominant win" if margin >= 2 else "⚡ Nail‑biting finish"
+
+                # Track closest match (biggest comeback / closest fight)
+                if margin < closest_margin:
+                    closest_margin = margin
+                    closest_match = f"{pair_a} vs {pair_b} ({a_sets}-{b_sets})"
+
+                # Compute top performer (simple heuristic: total points)
+                top_performer = pair_a if a_pts >= b_pts else pair_b
+
+                st.markdown(
+                    f"""
+                    **Match {idx + 1}**  
+                    🏏 **{pair_a} vs {pair_b}**  
+
+                    🏆 **Winner:** {winner}  
+                    📊 **Sets:** {a_sets} – {b_sets}  
+                    🎯 **Points:** {a_pts} – {b_pts}  
+                    ⭐ **Top Performer:** {top_performer}  
+                    {highlight}
+                    """
+                )
+
+        # ==========================
+        # GLOBAL INSIGHTS SUMMARY
+        # ==========================
+        st.markdown("---")
+        st.markdown("## 🌟 Tournament Insights")
+
+        if closest_match:
+            st.success(f"⚡ **Closest Match:** {closest_match}")
+
+        st.caption("Insights are auto‑generated based on completed matches and updated dynamically.")
