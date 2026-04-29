@@ -44,20 +44,54 @@ fixtures = load_json("data/fixtures.json")
 # =================================================
 # RESULTS LOADER
 # =================================================
+#def load_results():
+ #   rows = requests.get(SCRIPT_URL, timeout=10).json()
+  #  data = defaultdict(lambda: {"matches": [{}, {}, {}]})
+
+   # for row in rows:
+    #    try:
+     #       tie_id = int(row["tie_id"])
+      #      idx = int(row["match_index"]) - 1
+       #     sets = json.loads(row["sets_json"])
+        #    if sets:
+         #       data[tie_id]["matches"][idx] = {"sets": sets}
+        #except:
+         #   continue
+    #return dict(data)
+
+@st.cache_data(ttl=30, show_spinner=False)
 def load_results():
-    rows = requests.get(SCRIPT_URL, timeout=10).json()
+    """
+    Safely load match results from Google Sheets / Apps Script.
+    Never crashes the app.
+    Cached for 30 seconds to avoid rate limits.
+    """
     data = defaultdict(lambda: {"matches": [{}, {}, {}]})
 
-    for row in rows:
-        try:
-            tie_id = int(row["tie_id"])
-            idx = int(row["match_index"]) - 1
-            sets = json.loads(row["sets_json"])
-            if sets:
-                data[tie_id]["matches"][idx] = {"sets": sets}
-        except:
-            continue
+    try:
+        response = requests.get(SCRIPT_URL, timeout=8)
+        response.raise_for_status()
+        rows = response.json()
+
+        for row in rows:
+            try:
+                tie_id = int(row["tie_id"])
+                idx = int(row["match_index"]) - 1
+                sets = json.loads(row["sets_json"])
+                if sets:
+                    data[tie_id]["matches"][idx] = {"sets": sets}
+            except Exception:
+                continue
+
+    except requests.exceptions.Timeout:
+        st.warning("⚠️ Results service is slow. Showing cached / empty results.")
+    except requests.exceptions.RequestException:
+        st.warning("⚠️ Results service unavailable. Please retry later.")
+    except Exception:
+        st.warning("⚠️ Unexpected error loading results.")
+
     return dict(data)
+
 
 # =================================================
 # MENU
