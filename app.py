@@ -370,6 +370,9 @@ elif menu == "Player Standings":
 
     results = load_results()
 
+    from collections import defaultdict
+    import pandas as pd
+
     stats = defaultdict(lambda: {
         "Team": "",
         "Played": 0,
@@ -382,11 +385,12 @@ elif menu == "Player Standings":
         "Form": []
     })
 
-    # Assign teams
+    # Assign teams to players
     for team, players in teams_data.items():
         for p in players:
             stats[p]["Team"] = team
 
+    # Process results
     for tid, r in results.items():
         fixture = next(f for f in fixtures if f["tie_id"] == tid)
 
@@ -437,41 +441,50 @@ elif menu == "Player Standings":
 
     # Build DataFrame
     df = pd.DataFrame.from_dict(stats, orient="index")
+
     df["Set Diff"] = df["Sets Won"] - df["Sets Lost"]
     df["Point Diff"] = df["Points Won"] - df["Points Lost"]
     df["Recent Form"] = df["Form"].apply(lambda x: " ".join(x[-5:]))
 
     df = df.drop(columns=["Form"])
 
+    # Sort standings
     df = df.sort_values(
         by=["Wins", "Set Diff", "Point Diff", "Played"],
         ascending=[False, False, False, True]
     )
 
-   # Move Player (index) into a column
-df = df.reset_index().rename(columns={"index": "Player"})
+    # Add Rank column
+    df.insert(0, "Rank", range(1, len(df) + 1))
 
-# Reorder columns as required
-column_order = [
-    "Team",
-    "Rank",
-    "Player",
-    "Played",
-    "Wins",
-    "Losses",
-    "Sets Won",
-    "Sets Lost",
-    "Set Diff",
-    "Points Won",
-    "Points Lost",
-    "Point Diff",
-    "Recent Form"
-]
+    # Move Player name from index to column
+    df = df.reset_index().rename(columns={"index": "Player"})
 
-df = df[column_order]
+    # Final column order (as requested)
+    column_order = [
+        "Team",
+        "Rank",
+        "Player",
+        "Played",
+        "Wins",
+        "Losses",
+        "Sets Won",
+        "Sets Lost",
+        "Set Diff",
+        "Points Won",
+        "Points Lost",
+        "Point Diff",
+        "Recent Form"
+    ]
 
-# Show table WITHOUT the index (removes 0,1,2 column)
-st.dataframe(df, use_container_width=True, hide_index=True)
+    df = df[column_order]
+
+    # Display without index (removes 0 / duplicate ranking column)
+    st.dataframe(
+        df,
+        use_container_width=True,
+        hide_index=True
+    )
 
 # =================================================
 # INSIGHTS
