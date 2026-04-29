@@ -448,10 +448,30 @@ elif menu == "Player Standings":
         ascending=[False, False, False, True]
     )
 
-    df.insert(0, "Rank", range(1, len(df) + 1))
+   # Move Player (index) into a column
+df = df.reset_index().rename(columns={"index": "Player"})
 
-    st.dataframe(df.reset_index().rename(columns={"index": "Player"}),
-                 use_container_width=True)
+# Reorder columns as required
+column_order = [
+    "Team",
+    "Rank",
+    "Player",
+    "Played",
+    "Wins",
+    "Losses",
+    "Sets Won",
+    "Sets Lost",
+    "Set Diff",
+    "Points Won",
+    "Points Lost",
+    "Point Diff",
+    "Recent Form"
+]
+
+df = df[column_order]
+
+# Show table WITHOUT the index (removes 0,1,2 column)
+st.dataframe(df, use_container_width=True, hide_index=True)
 
 # =================================================
 # INSIGHTS
