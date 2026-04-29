@@ -83,19 +83,14 @@ if menu == "Overview":
 # FIXTURES (FULLY HTML – CSS GUARANTEED)
 # =================================================
 elif menu == "Fixtures":
-    import streamlit.components.v1 as components
-    from collections import defaultdict
-
     st.subheader("Fixtures")
 
     results = load_results()
 
-    # ✅ Group by round_no
+    # ✅ Group fixtures by round_no (now guaranteed)
     fixtures_by_round = defaultdict(list)
     for f in fixtures:
-        round_value = f.get("round_no") or f.get("Round") or 1
-        fixtures_by_round[round_value].append(f)
-
+        fixtures_by_round[f["round_no"]].append(f)
 
     available_rounds = sorted(fixtures_by_round.keys())
 
@@ -104,7 +99,7 @@ elif menu == "Fixtures":
         available_rounds
     )
 
-    # Round summary
+    # ✅ Round summary
     total_ties = len(fixtures_by_round[selected_round])
     total_matches = total_ties * 3
 
@@ -122,98 +117,50 @@ elif menu == "Fixtures":
 
     html = """
     <style>
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 24px;
-        }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
         .card {
             background: #ffffff;
             border: 1px solid #e5e7eb;
             border-radius: 14px;
             padding: 20px;
-            font-family: Inter, Segoe UI, sans-serif;
         }
-        .title {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-        .vs {
-            color: #f59e0b;
-            padding: 0 4px;
-        }
-        .meta {
-            font-size: 13px;
-            color: #6b7280;
-            margin-bottom: 6px;
-        }
-        .progress {
-            background: #e5e7eb;
-            height: 8px;
-            border-radius: 6px;
-            overflow: hidden;
-            margin-bottom: 12px;
-        }
-        .bar {
-            background: #1f7aed;
-            height: 100%;
-        }
-        .divider {
-            border-top: 1px solid #e5e7eb;
-            margin: 10px 0;
-        }
-        .row {
-            font-size: 14px;
-            padding: 6px 0;
-            color: #374151;
-        }
+        .title { font-size: 16px; font-weight: 600; }
+        .vs { color: #f59e0b; padding: 0 4px; }
+        .meta { font-size: 13px; color: #6b7280; }
+        .progress { background: #e5e7eb; height: 8px; border-radius: 6px; }
+        .bar { background: #1f7aed; height: 100%; }
+        .row { font-size: 14px; padding: 6px 0; color: #374151; }
     </style>
-
     <div class="grid">
     """
 
-    for f in fixtures_by_round[selected_round]:
+for f in fixtures_by_round[selected_round]:
         tie_id = f["tie_id"]
         match_results = results.get(tie_id, {}).get("matches", [])
 
-        completed_count = sum(
-            1 for m in match_results if m and "sets" in m
-        )
-
-        percent = int((completed_count / 3) * 100)
+        completed = sum(1 for m in match_results if m and "sets" in m)
+        percent = int((completed / 3) * 100)
 
         html += f"""
         <div class="card">
             <div class="title">
                 {f["team_a"]}<span class="vs">vs</span>{f["team_b"]}
             </div>
-            <div class="meta">{completed_count} / 3 matches completed</div>
-
+            <div class="meta">{completed} / 3 matches completed</div>
             <div class="progress">
                 <div class="bar" style="width:{percent}%"></div>
             </div>
-
-            <div class="divider"></div>
         """
 
-        for idx, (pair_a, pair_b) in enumerate(f["matches"]):
-            match_number = idx + 1
-            match_data = match_results[idx] if idx < len(match_results) else None
-            status = "✅" if match_data and "sets" in match_data else "⏳"
-
-            html += f"""
-            <div class="row">
-                <strong>M{match_number}</strong> {status}
-                {pair_a} <span class="vs">vs</span> {pair_b}
-            </div>
-            """
+        for idx, (a, b) in enumerate(f["matches"]):
+            status = "✅" if idx < len(match_results) and match_results[idx].get("sets") else "⏳"
+            html += f"<div class='row'><strong>M{idx+1}</strong> {status} {a} vs {b}</div>"
 
         html += "</div>"
 
     html += "</div>"
-
     components.html(html, height=1200, scrolling=True)
+
 
 # =================================================
 # RESULTS
