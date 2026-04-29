@@ -73,11 +73,19 @@ menu = st.radio(
 # =================================================
 if menu == "Overview":
     st.subheader("Tournament Overview")
-    c1, c2, c3, c4 = st.columns(4)
+
+    # Derived metrics
+    total_rounds = len(set(f["round_no"] for f in fixtures))
+    total_fixtures = len(fixtures)
+    total_matches = total_fixtures * 3
+
+    c1, c2, c3, c4, c5 = st.columns(5)
+
     c1.metric("Status", "LIVE")
     c2.metric("Teams", len(teams_data))
-    c3.metric("Total Fixtures", len(fixtures))
-    c4.metric("Matches per Fixture", 3)
+    c3.metric("Rounds", total_rounds)
+    c4.metric("Fixtures", total_fixtures)
+    c5.metric("Total Matches", total_matches)
 
 # =================================================
 # FIXTURES (FULLY HTML – CSS GUARANTEED)
