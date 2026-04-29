@@ -93,8 +93,7 @@ elif menu == "Fixtures":
     # Group fixtures by round
     fixtures_by_round = defaultdict(list)
     for f in fixtures:
-        fixtures_by_round[f["Round"]].append(f)
-
+        fixtures_by_round[f["round_no"]].append(f)
     html = """
     <style>
         .grid {
