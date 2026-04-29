@@ -90,10 +90,34 @@ elif menu == "Fixtures":
 
     results = load_results()
 
-    # Group fixtures by round
+    # ✅ Group by round_no
     fixtures_by_round = defaultdict(list)
     for f in fixtures:
         fixtures_by_round[f["round_no"]].append(f)
+
+    available_rounds = sorted(fixtures_by_round.keys())
+
+    selected_round = st.selectbox(
+        "Select Round",
+        available_rounds
+    )
+
+    # Round summary
+    total_ties = len(fixtures_by_round[selected_round])
+    total_matches = total_ties * 3
+
+    completed_matches = 0
+    for f in fixtures_by_round[selected_round]:
+        completed_matches += sum(
+            1 for m in results.get(f["tie_id"], {}).get("matches", [])
+            if m and "sets" in m
+        )
+
+    st.info(
+        f"📊 **Round {selected_round} Summary:** "
+        f"{completed_matches} / {total_matches} matches completed"
+    )
+
     html = """
     <style>
         .grid {
@@ -107,11 +131,6 @@ elif menu == "Fixtures":
             border-radius: 14px;
             padding: 20px;
             font-family: Inter, Segoe UI, sans-serif;
-        }
-        .round-title {
-            font-size: 20px;
-            font-weight: 700;
-            margin: 25px 0 12px;
         }
         .title {
             font-size: 16px;
@@ -148,63 +167,51 @@ elif menu == "Fixtures":
             color: #374151;
         }
     </style>
+
+    <div class="grid">
     """
 
-    # Render all rounds
-    for round_no in sorted(fixtures_by_round.keys()):
-        html += f'<div class="round-title">🏁 Round {round_no}</div>'
-        html += '<div class="grid">'
+    for f in fixtures_by_round[selected_round]:
+        tie_id = f["tie_id"]
+        match_results = results.get(tie_id, {}).get("matches", [])
 
-        for f in fixtures_by_round[round_no]:
-            tie_id = f["tie_id"]
-            match_results = results.get(tie_id, {}).get("matches", [])
+        completed_count = sum(
+            1 for m in match_results if m and "sets" in m
+        )
 
-            # Count completed matches
-            completed_count = sum(
-                1 for m in match_results if m and "sets" in m
-            )
+        percent = int((completed_count / 3) * 100)
 
-            percent = int((completed_count / 3) * 100)
+        html += f"""
+        <div class="card">
+            <div class="title">
+                {f["team_a"]}<span class="vs">vs</span>{f["team_b"]}
+            </div>
+            <div class="meta">{completed_count} / 3 matches completed</div>
+
+            <div class="progress">
+                <div class="bar" style="width:{percent}%"></div>
+            </div>
+
+            <div class="divider"></div>
+        """
+
+        for idx, (pair_a, pair_b) in enumerate(f["matches"]):
+            match_number = idx + 1
+            match_data = match_results[idx] if idx < len(match_results) else None
+            status = "✅" if match_data and "sets" in match_data else "⏳"
 
             html += f"""
-            <div class="card">
-                <div class="title">
-                    {f["team_a"]}<span class="vs">vs</span>{f["team_b"]}
-                </div>
-                <div class="meta">{completed_count} / 3 matches completed</div>
-
-                <div class="progress">
-                    <div class="bar" style="width:{percent}%"></div>
-                </div>
-
-                <div class="divider"></div>
+            <div class="row">
+                <strong>M{match_number}</strong> {status}
+                {pair_a} <span class="vs">vs</span> {pair_b}
+            </div>
             """
-
-            # Per-match rows
-            for idx, (pair_a, pair_b) in enumerate(f["matches"]):
-                match_number = idx + 1
-
-                match_data = (
-                    match_results[idx]
-                    if idx < len(match_results)
-                    else None
-                )
-
-                is_completed = bool(match_data and "sets" in match_data)
-                status_icon = "✅" if is_completed else "⏳"
-
-                html += f"""
-                <div class="row">
-                    <strong>M{match_number}</strong> {status_icon}
-                    {pair_a} <span class="vs">vs</span> {pair_b}
-                </div>
-                """
-
-            html += "</div>"
 
         html += "</div>"
 
-    components.html(html, height=1700, scrolling=True)
+    html += "</div>"
+
+    components.html(html, height=1200, scrolling=True)
 
 # =================================================
 # RESULTS
