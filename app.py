@@ -539,11 +539,7 @@ elif menu == "Insights":
                         """
                     )
 
-                    st.button(
-                        "🎥 Watch Highlights (Coming Soon)",
-                        key=f"video_{tid}_{idx}",
-                        disabled=True
-                    )
+                    
 
                 # Move to next column (0 → 1 → 2 → 0)
                 col_index = (col_index + 1) % 3
