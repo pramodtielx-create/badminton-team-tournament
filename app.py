@@ -93,7 +93,9 @@ elif menu == "Fixtures":
     # ✅ Group by round_no
     fixtures_by_round = defaultdict(list)
     for f in fixtures:
-        fixtures_by_round[f["round_no"]].append(f)
+        round_value = f.get("round_no") or f.get("Round") or 1
+        fixtures_by_round[round_value].append(f)
+
 
     available_rounds = sorted(fixtures_by_round.keys())
 
