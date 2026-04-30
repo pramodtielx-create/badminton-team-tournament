@@ -418,6 +418,20 @@ elif menu == "Team Standings":
 
     st.dataframe(df, use_container_width=True)
 
+elif menu == "Teams":
+    st.subheader("🏸 Teams & Players")
+
+    # Create exactly 4 columns
+    cols = st.columns(4)
+
+    for col, (team, players) in zip(cols, teams_data.items()):
+        with col:
+            # Card‑like container using Streamlit primitives (stable)
+            st.markdown(f"### {team}")
+            st.divider()
+
+            for p in players:
+                st.write(f"• {p}")
 # =================================================
 # PLAYER STANDINGS
 # =================================================
