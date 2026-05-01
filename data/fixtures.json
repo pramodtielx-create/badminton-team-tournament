@@ -78,7 +78,6 @@
     ]
   },
 
- 
   {
     "round_no": 2,
     "tie_id": 201,
@@ -113,9 +112,9 @@
     "toss": "Smash Titans",
     "service": "Racket Scientists",
     "matches": [
-      ["Jayant / Amit", "TBD"],
-      ["Nishit / Sandeep W", "TBD"],
-      ["Omkar / Ganesh", "TBD"]
+      ["Jayant / Amit", "Amol S / Pradyum"],
+      ["Nishit / Sandeep W", "Kiran / Kaustubh"],
+      ["Omkar / Ganesh", "Piyush / Amol P"]
     ]
   },
   {
