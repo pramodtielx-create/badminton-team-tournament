@@ -83,8 +83,8 @@
     "tie_id": 201,
     "team_a": "Smash Titans",
     "team_b": "Quantum Force",
-    "toss": "Quantum Force",
-    "service": "Smash Titans",
+    "toss": "Smash Titans",
+    "service": "Quantum Force",
     "matches": [
       ["Jayant / Amit", "Rajendra / Aniket"],
       ["Omkar / Sandeep W", "Deepak L / Rahul"],
@@ -109,8 +109,8 @@
     "tie_id": 203,
     "team_a": "Smash Titans",
     "team_b": "Racket Scientists",
-    "toss": "Smash Titans",
-    "service": "Racket Scientists",
+    "toss": "Racket Scientists",
+    "service": "Smash Titans",
     "matches": [
       ["Jayant / Amit", "Amol S / Pradyum"],
       ["Nishit / Sandeep W", "Kiran / Kaustubh"],
@@ -125,9 +125,9 @@
     "toss": "Quantum Force",
     "service": "Net Ninjas",
     "matches": [
-      ["Rajendra / Deepak L", "TBD"],
-      ["Aniket / Manmohan", "TBD"],
-      ["Rahul / Prashant", "TBD"]
+      ["Rajendra / Deepak L", "Jaswanth / Ritesh"],
+      ["TBD", "Sandeepk / Vikram"],
+      ["TBD", "Pramod / Deepak T"]
     ]
   },
   {
@@ -138,23 +138,22 @@
     "toss": "Smash Titans",
     "service": "Net Ninjas",
     "matches": [
-      ["Jayant / Sandeep W", "TBD"],
-      ["Nishit / Omkar", "TBD"],
-      ["Ganesh / Amit", "TBD"]
+      ["Jayant / Sandeep W", "Pramod / Deepak T"],
+      ["TBD", "Jaswanth / Sandeepk"],
+      ["TBD", "Vikram / Ritesh"]
     ]
   },
- {
-  "round_no": 2,
-  "tie_id": 206,
-  "team_a": "Quantum Force",
-  "team_b": "Racket Scientists",
-  "toss": "Quantum Force",
-  "service": "Racket Scientists",
-  "matches": [
-    ["Rajendra / Aniket", "Kiran / Piyush"],
-    ["Deepak L / Manmohan", "Kaustubh / Amol P"],
-    ["Rahul / Prashant", "Amol S / Pradyum"]
-  ]
-}
-
+  {
+    "round_no": 2,
+    "tie_id": 206,
+    "team_a": "Quantum Force",
+    "team_b": "Racket Scientists",
+    "toss": "Quantum Force",
+    "service": "Racket Scientists",
+    "matches": [
+      ["Rajendra / Aniket", "Kiran / Piyush"],
+      ["Deepak L / Manmohan", "Kaustubh / Amol P"],
+      ["Rahul / Prashant", "Amol S / Pradyum"]
+    ]
+  }
 ]
