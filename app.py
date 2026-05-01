@@ -301,8 +301,65 @@ elif menu == "Fixtures":
 elif menu == "Results":
     import streamlit.components.v1 as components
 
+    st.subheader("Results")
+
     results = load_results()
 
+    # ==================================================
+    # FILTER CHECKBOXES (SAME AS FIXTURES)
+    # ==================================================
+    c1, c2, c3, c4 = st.columns(4)
+
+    with c1:
+        show_round_1 = st.checkbox("Round 1", value=False, key="res_r1")
+    with c2:
+        show_round_2 = st.checkbox("Round 2", value=True, key="res_r2")   # ✅ default
+    with c3:
+        show_completed = st.checkbox("Completed", value=False, key="res_done")
+    with c4:
+        show_pending = st.checkbox("Pending", value=True, key="res_pending")  # ✅ default
+
+    # ==================================================
+    # HELPER: check if a fixture is completed
+    # ==================================================
+    def fixture_completed(f):
+        match_results = results.get(f["tie_id"], {}).get("matches", [])
+        completed_count = sum(
+            1 for m in match_results if m and "sets" in m
+        )
+        return completed_count == len(f["matches"])
+
+    # ==================================================
+    # FILTER FIXTURES FIRST (SAME LOGIC AS FIXTURES PAGE)
+    # ==================================================
+    filtered_fixtures = []
+    for f in fixtures:
+        # round filter
+        round_ok = (
+            (f.get("round_no") == 1 and show_round_1) or
+            (f.get("round_no") == 2 and show_round_2)
+        )
+        if not round_ok:
+            continue
+
+        completed = fixture_completed(f)
+
+        # status filter
+        status_ok = (
+            (completed and show_completed) or
+            (not completed and show_pending)
+        )
+
+        if status_ok:
+            filtered_fixtures.append(f)
+
+    if not filtered_fixtures:
+        st.info("No results match the selected filters.")
+        st.stop()
+
+    # ==================================================
+    # HTML + RESULT CARDS (UNCHANGED)
+    # ==================================================
     html = """
     <style>
         .result-card {
@@ -330,13 +387,14 @@ elif menu == "Results":
     </style>
     """
 
-    for tid, r in results.items():
-        f = next(fx for fx in fixtures if fx["tie_id"] == tid)
+    for f in filtered_fixtures:
+        tid = f["tie_id"]
+        r = results.get(tid, {"matches": []})
 
         html += f"""
         <div class="result-card">
             <div style="font-size:16px;font-weight:600;margin-bottom:8px;">
-                {f['team_a']} vs {f['team_b']}
+                Round {f["round_no"]} · {f["team_a"]} vs {f["team_b"]}
             </div>
         """
 
@@ -345,14 +403,14 @@ elif menu == "Results":
                 html += f"<div class='match'>M{idx}: Pending</div>"
                 continue
 
-            a_sets = sum(1 for a,b in m["sets"] if a>b)
+            a_sets = sum(1 for a, b in m["sets"] if a > b)
             b_sets = len(m["sets"]) - a_sets
-            score = " | ".join(f"{a}-{b}" for a,b in m["sets"])
+            score = " | ".join(f"{a}-{b}" for a, b in m["sets"])
 
             win_class = "winner" if a_sets > b_sets else "loser"
             lose_class = "loser" if a_sets > b_sets else "winner"
 
-            pA, pB = f["matches"][idx-1]
+            pA, pB = f["matches"][idx - 1]
 
             html += f"""
             <div class="match">
