@@ -298,81 +298,6 @@ elif menu == "Fixtures":
 # =================================================
 # RESULTS
 # =================================================
-# =================================================
-# RESULTS
-# =================================================
-elif menu == "Results":
-    import streamlit.components.v1 as components
-
-    st.subheader("Results")
-
-    results = load_results()
-
-    # ==================================================
-    # FILTER CHECKBOXES (SAME AS FIXTURES)
-    # ==================================================
-    c1, c2, c3, c4 = st.columns(4)
-
-    with c1:
-        show_round_1 = st.checkbox("Round 1", value=False, key="res_r1")
-    with c2:
-        show_round_2 = st.checkbox("Round 2", value=True, key="res_r2")   # ✅ default
-    with c3:
-        show_completed = st.checkbox("Completed", value=False, key="res_done")
-    with c4:
-        show_pending = st.checkbox("Pending", value=True, key="res_pending")  # ✅ default
-
-    # ==================================================
-    # HELPER — COMPLETION LOGIC (MATCHES FIXTURES)
-    # ==================================================
-    def fixture_completed(f):
-        match_results = results.get(f["tie_id"], {}).get("matches")
-
-        # ✅ If results not available yet → treat as pending (but still SHOW)
-        if not match_results:
-            return False
-
-        completed_count = sum(
-            1 for m in match_results if m and "sets" in m
-        )
-        return completed_count == len(f["matches"])
-
-    # ==================================================
-    # FILTER FIXTURES (SAME MODEL AS FIXTURES PAGE)
-    # ==================================================
-    filtered_fixtures = []
-    for f in fixtures:
-        # round filter
-        round_ok = (
-            (f.get("round_no") == 1 and show_round_1) or
-            (f.get("round_no") == 2 and show_round_2)
-        )
-        if not round_ok:
-            continue
-
-        completed = fixture_completed(f)
-
-        # status filter
-        status_ok = (
-            (completed and show_completed) or
-            (not completed and show_pending)
-        )
-
-        if status_ok:
-            filtered_fixtures.append(f)
-
-    if not filtered_fixtures:
-        st.info(
-            "No results match the selected filters.\n\n"
-            "Tip:\n"
-            "• Select **Pending** to see ongoing ties\n"
-            "• A tie appears as **Completed** only when all 3 matches finish"
-        )
-        st.stop()
-
-# ==================================================
-# RESULTS UI — TWO CARDS PER ROW ✅
-# ==================================================
 elif menu == "Results":
     import streamlit.components.v1 as components
 
@@ -391,14 +316,12 @@ elif menu == "Results":
     with c4:
         show_pending = st.checkbox("Pending", value=True, key="res_pending")
 
-    # ================= COMPLETION LOGIC (MATCHES FIXTURES) =================
     def fixture_completed(f):
         match_results = results.get(f["tie_id"], {}).get("matches")
         if not match_results:
             return False
         return sum(1 for m in match_results if m and "sets" in m) == len(f["matches"])
 
-    # ================= FILTER FIXTURES =================
     filtered_fixtures = []
     for f in fixtures:
         round_ok = (
@@ -421,7 +344,6 @@ elif menu == "Results":
         st.info("No results match the selected filters.")
         st.stop()
 
-    # ================= HTML (2 CARDS PER ROW) =================
     html = """
     <style>
         .grid {
@@ -440,25 +362,16 @@ elif menu == "Results":
             font-size: 14px;
             color: #374151;
         }
-        .winner {
-            color: #16a34a;
-            font-weight: 600;
-        }
-        .loser {
-            color: #6b7280;
-        }
-        .score {
-            font-weight: 600;
-            margin-left: 6px;
-        }
+        .winner { color: #16a34a; font-weight: 600; }
+        .loser { color: #6b7280; }
+        .score { font-weight: 600; margin-left: 6px; }
     </style>
 
     <div class="grid">
     """
 
     for f in filtered_fixtures:
-        tie_id = f["tie_id"]
-        result_matches = results.get(tie_id, {}).get("matches", [])
+        result_matches = results.get(f["tie_id"], {}).get("matches", [])
 
         html += f"""
         <div class="result-card">
@@ -467,7 +380,6 @@ elif menu == "Results":
             </div>
         """
 
-        # IMPORTANT: iterate FIXTURE matches
         for idx, (pA, pB) in enumerate(f["matches"], start=1):
             match_data = result_matches[idx - 1] if idx - 1 < len(result_matches) else None
 
@@ -499,7 +411,6 @@ elif menu == "Results":
     html += "</div>"
 
     components.html(html, height=900, scrolling=True)
-
 
 # =================================================
 # TEAM STANDINGS (BASIC, STABLE)
