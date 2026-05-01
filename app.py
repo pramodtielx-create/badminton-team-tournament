@@ -330,11 +330,10 @@ elif menu == "Results":
         return completed_count == len(f["matches"])
 
     # ==================================================
-    # FILTER FIXTURES FIRST (SAME LOGIC AS FIXTURES PAGE)
+    # FILTER FIXTURES (SAME AS FIXTURES PAGE)
     # ==================================================
     filtered_fixtures = []
     for f in fixtures:
-        # round filter
         round_ok = (
             (f.get("round_no") == 1 and show_round_1) or
             (f.get("round_no") == 2 and show_round_2)
@@ -343,8 +342,6 @@ elif menu == "Results":
             continue
 
         completed = fixture_completed(f)
-
-        # status filter
         status_ok = (
             (completed and show_completed) or
             (not completed and show_pending)
@@ -358,16 +355,20 @@ elif menu == "Results":
         st.stop()
 
     # ==================================================
-    # HTML + RESULT CARDS (UNCHANGED)
+    # HTML + RESULT CARDS (2 PER ROW ✅)
     # ==================================================
     html = """
     <style>
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
         .result-card {
             background:#ffffff;
             border:1px solid #e5e7eb;
             border-radius:14px;
             padding:18px;
-            margin-bottom:20px;
         }
         .match {
             padding:6px 0;
@@ -385,6 +386,8 @@ elif menu == "Results":
             margin-left:6px;
         }
     </style>
+
+    <div class="grid">
     """
 
     for f in filtered_fixtures:
@@ -422,6 +425,8 @@ elif menu == "Results":
             """
 
         html += "</div>"
+
+    html += "</div>"
 
     components.html(html, height=900, scrolling=True)
 # =================================================
