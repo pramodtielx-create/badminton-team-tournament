@@ -391,12 +391,14 @@ elif menu == "Results":
     with c4:
         show_pending = st.checkbox("Pending", value=True, key="res_pending")
 
+    # ================= COMPLETION LOGIC (MATCHES FIXTURES) =================
     def fixture_completed(f):
-        mr = results.get(f["tie_id"], {}).get("matches")
-        if not mr:
+        match_results = results.get(f["tie_id"], {}).get("matches")
+        if not match_results:
             return False
-        return sum(1 for m in mr if m and "sets" in m) == len(f["matches"])
+        return sum(1 for m in match_results if m and "sets" in m) == len(f["matches"])
 
+    # ================= FILTER FIXTURES =================
     filtered_fixtures = []
     for f in fixtures:
         round_ok = (
@@ -419,7 +421,7 @@ elif menu == "Results":
         st.info("No results match the selected filters.")
         st.stop()
 
-    # ================= UI =================
+    # ================= HTML (2 CARDS PER ROW) =================
     html = """
     <style>
         .grid {
@@ -436,7 +438,7 @@ elif menu == "Results":
         .match {
             padding: 6px 0;
             font-size: 14px;
-            color: #374151;   /* ✅ CRITICAL FIX */
+            color: #374151;
         }
         .winner {
             color: #16a34a;
@@ -455,8 +457,8 @@ elif menu == "Results":
     """
 
     for f in filtered_fixtures:
-        tid = f["tie_id"]
-        result_matches = results.get(tid, {}).get("matches", [])
+        tie_id = f["tie_id"]
+        result_matches = results.get(tie_id, {}).get("matches", [])
 
         html += f"""
         <div class="result-card">
@@ -465,6 +467,7 @@ elif menu == "Results":
             </div>
         """
 
+        # IMPORTANT: iterate FIXTURE matches
         for idx, (pA, pB) in enumerate(f["matches"], start=1):
             match_data = result_matches[idx - 1] if idx - 1 < len(result_matches) else None
 
@@ -474,29 +477,29 @@ elif menu == "Results":
                     <strong>M{idx}</strong>: {pA} vs {pB} — Pending
                 </div>
                 """
-                continue
+            else:
+                a_sets = sum(1 for a, b in match_data["sets"] if a > b)
+                b_sets = len(match_data["sets"]) - a_sets
+                score = " | ".join(f"{a}-{b}" for a, b in match_data["sets"])
 
-            a_sets = sum(1 for a, b in match_data["sets"] if a > b)
-            b_sets = len(match_data["sets"]) - a_sets
-            score = " | ".join(f"{a}-{b}" for a, b in match_data["sets"])
+                win = "winner" if a_sets > b_sets else "loser"
+                lose = "loser" if a_sets > b_sets else "winner"
 
-            win = "winner" if a_sets > b_sets else "loser"
-            lose = "loser" if a_sets > b_sets else "winner"
-
-            html += f"""
-            <div class="match">
-                <span class="{win}">{pA}</span>
-                vs
-                <span class="{lose}">{pB}</span>
-                <span class="score">({score})</span>
-            </div>
-            """
+                html += f"""
+                <div class="match">
+                    <span class="{win}">{pA}</span>
+                    vs
+                    <span class="{lose}">{pB}</span>
+                    <span class="score">({score})</span>
+                </div>
+                """
 
         html += "</div>"
 
     html += "</div>"
 
     components.html(html, height=900, scrolling=True)
+
 
 # =================================================
 # TEAM STANDINGS (BASIC, STABLE)
