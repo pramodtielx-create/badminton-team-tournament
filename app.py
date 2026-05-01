@@ -298,6 +298,9 @@ elif menu == "Fixtures":
 # =================================================
 # RESULTS
 # =================================================
+# =================================================
+# RESULTS
+# =================================================
 elif menu == "Results":
     import streamlit.components.v1 as components
 
@@ -320,20 +323,26 @@ elif menu == "Results":
         show_pending = st.checkbox("Pending", value=True, key="res_pending")  # ✅ default
 
     # ==================================================
-    # HELPER: check if a fixture is completed
+    # HELPER — COMPLETION LOGIC (MATCHES FIXTURES)
     # ==================================================
     def fixture_completed(f):
-        match_results = results.get(f["tie_id"], {}).get("matches", [])
+        match_results = results.get(f["tie_id"], {}).get("matches")
+
+        # ✅ If results not available yet → treat as pending (but still SHOW)
+        if not match_results:
+            return False
+
         completed_count = sum(
             1 for m in match_results if m and "sets" in m
         )
         return completed_count == len(f["matches"])
 
     # ==================================================
-    # FILTER FIXTURES (SAME AS FIXTURES PAGE)
+    # FILTER FIXTURES (SAME MODEL AS FIXTURES PAGE)
     # ==================================================
     filtered_fixtures = []
     for f in fixtures:
+        # round filter
         round_ok = (
             (f.get("round_no") == 1 and show_round_1) or
             (f.get("round_no") == 2 and show_round_2)
@@ -342,6 +351,8 @@ elif menu == "Results":
             continue
 
         completed = fixture_completed(f)
+
+        # status filter
         status_ok = (
             (completed and show_completed) or
             (not completed and show_pending)
@@ -351,11 +362,16 @@ elif menu == "Results":
             filtered_fixtures.append(f)
 
     if not filtered_fixtures:
-        st.info("No results match the selected filters.")
+        st.info(
+            "No results match the selected filters.\n\n"
+            "Tip:\n"
+            "• Select **Pending** to see ongoing ties\n"
+            "• A tie appears as **Completed** only when all 3 matches finish"
+        )
         st.stop()
 
     # ==================================================
-    # HTML + RESULT CARDS (2 PER ROW ✅)
+    # RESULTS UI — TWO CARDS PER ROW ✅
     # ==================================================
     html = """
     <style>
@@ -402,7 +418,7 @@ elif menu == "Results":
         """
 
         for idx, m in enumerate(r["matches"], start=1):
-            if not m:
+            if not m or "sets" not in m:
                 html += f"<div class='match'>M{idx}: Pending</div>"
                 continue
 
