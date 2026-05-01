@@ -99,9 +99,10 @@ def load_results():
 
 menu = st.radio(
     "Navigate",
-    ["Overview", "Fixtures", "Results", "Teams", "Team Standings", "Player Standings","Insights"],
+    ["Overview", "Fixtures", "Results", "Teams", "Team Standings","Insights"],
     horizontal=True
 )
+
 # =================================================
 # OVERVIEW
 # =================================================
