@@ -298,160 +298,45 @@ elif menu == "Fixtures":
 # =================================================
 # RESULTS
 # =================================================
-import streamlit as st
-import streamlit.components.v1 as components
-import json
-import requests
-import pandas as pd
-from collections import defaultdict
-
-# =================================================
-# PAGE CONFIG
-# =================================================
-st.set_page_config(page_title="🏸 Tournament Intelligence Platform", layout="wide")
-st.title("🏸 Tournament Intelligence Platform")
-
-# =================================================
-# DATA
-# =================================================
-teams_data = {
-    "Smash Titans": ["Omkar", "Nishit", "Ganesh", "Sandeep W", "Amit", "Jayant"],
-    "Quantum Force": ["Rajendra", "Aniket", "Deepak Lohar", "Rahul", "Manmohan", "Prashant"],
-    "Racket Scientists": ["Kiran", "Kaustubh", "Piyush", "Pradyum", "Amol S", "Amol P"],
-    "Net Ninjas": ["Jaswanth", "Sandeepk", "Ritesh", "Vikram", "Pramod", "Deepak T"]
-}
-
-SCRIPT_URL = st.secrets["SCRIPT_URL"]
-
-def load_json(path):
-    with open(path) as f:
-        return json.load(f)
-
-fixtures = load_json("data/fixtures.json")
-
-def load_results():
-    rows = requests.get(SCRIPT_URL, timeout=10).json()
-    data = defaultdict(lambda: {"matches": [{}, {}, {}]})
-
-    for r in rows:
-        try:
-            tid = int(r["tie_id"])
-            idx = int(r["match_index"]) - 1
-            sets = json.loads(r["sets_json"])
-            if sets:
-                data[tid]["matches"][idx] = {"sets": sets}
-        except:
-            pass
-    return dict(data)
-
-# =================================================
-# MENU
-# =================================================
-menu = st.radio(
-    "Navigate",
-    ["Overview", "Fixtures", "Results", "Teams"],
-    horizontal=True
-)
-
-# =================================================
-# OVERVIEW
-# =================================================
-if menu == "Overview":
-    st.info("Tournament dashboard overview")
-
-# =================================================
-# TEAMS (TABLE VIEW)
-# =================================================
-elif menu == "Teams":
-    st.subheader("🏸 Teams & Players")
-
-    max_players = max(len(p) for p in teams_data.values())
-    table = {}
-
-    for team, players in teams_data.items():
-        table[team] = players + [""] * (max_players - len(players))
-
-    df = pd.DataFrame(table)
-    st.dataframe(df, use_container_width=True, hide_index=True)
-
-# =================================================
-# FIXTURES (UNCHANGED – already correct in your app)
-# =================================================
-elif menu == "Fixtures":
-    st.info("Fixtures screen already implemented (unchanged)")
-
-# =================================================
-# RESULTS – CHECKBOX FILTER + 2 CARDS PER ROW ✅
-# =================================================
 elif menu == "Results":
-    st.subheader("Results")
+    import streamlit.components.v1 as components
 
     results = load_results()
 
-    # ---------------- CHECKBOX FILTERS ----------------
-    c1, c2, c3, c4 = st.columns(4)
-
-    with c1:
-        show_round_1 = st.checkbox("Round 1", value=False)
-    with c2:
-        show_round_2 = st.checkbox("Round 2", value=True)   # ✅ default
-    with c3:
-        show_completed = st.checkbox("Completed", value=False)
-    with c4:
-        show_pending = st.checkbox("Pending", value=True)  # ✅ default
-
-    def is_completed(f):
-        mr = results.get(f["tie_id"], {}).get("matches", [])
-        return sum(1 for m in mr if m and "sets" in m) == 3
-
-    filtered = []
-    for f in fixtures:
-        round_ok = (f["round_no"] == 1 and show_round_1) or (f["round_no"] == 2 and show_round_2)
-        status = is_completed(f)
-        status_ok = (status and show_completed) or (not status and show_pending)
-
-        if round_ok and status_ok:
-            filtered.append(f)
-
-    if not filtered:
-        st.info("No matching results.")
-        st.stop()
-
-    # ---------------- RESULT CSS ----------------
-    components.html("""
+    html = """
     <style>
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 24px;
-        }
         .result-card {
             background:#ffffff;
             border:1px solid #e5e7eb;
             border-radius:14px;
             padding:18px;
+            margin-bottom:20px;
         }
         .match {
             padding:6px 0;
             font-size:14px;
         }
-        .winner { color:#16a34a; font-weight:600; }
-        .loser { color:#6b7280; }
-        .score { font-weight:600; margin-left:6px; }
+        .winner {
+            color:#16a34a;
+            font-weight:600;
+        }
+        .loser {
+            color:#6b7280;
+        }
+        .score {
+            font-weight:600;
+            margin-left:6px;
+        }
     </style>
-    """, height=0)
+    """
 
-    html = "<div class='grid'>"
-
-    # ---------------- RESULT CARDS ----------------
-    for f in filtered:
-        tid = f["tie_id"]
-        r = results.get(tid, {"matches": []})
+    for tid, r in results.items():
+        f = next(fx for fx in fixtures if fx["tie_id"] == tid)
 
         html += f"""
         <div class="result-card">
             <div style="font-size:16px;font-weight:600;margin-bottom:8px;">
-                Round {f["round_no"]} · {f["team_a"]} vs {f["team_b"]}
+                {f['team_a']} vs {f['team_b']}
             </div>
         """
 
@@ -460,26 +345,26 @@ elif menu == "Results":
                 html += f"<div class='match'>M{idx}: Pending</div>"
                 continue
 
-            a_sets = sum(1 for a, b in m["sets"] if a > b)
+            a_sets = sum(1 for a,b in m["sets"] if a>b)
             b_sets = len(m["sets"]) - a_sets
-            score = " | ".join(f"{a}-{b}" for a, b in m["sets"])
+            score = " | ".join(f"{a}-{b}" for a,b in m["sets"])
 
-            win = "winner" if a_sets > b_sets else "loser"
-            lose = "loser" if a_sets > b_sets else "winner"
-            pa, pb = f["matches"][idx - 1]
+            win_class = "winner" if a_sets > b_sets else "loser"
+            lose_class = "loser" if a_sets > b_sets else "winner"
+
+            pA, pB = f["matches"][idx-1]
 
             html += f"""
             <div class="match">
-                <span class="{win}">{pa}</span>
+                <span class="{win_class}">{pA}</span>
                 vs
-                <span class="{lose}">{pb}</span>
+                <span class="{lose_class}">{pB}</span>
                 <span class="score">({score})</span>
             </div>
             """
 
         html += "</div>"
 
-    html += "</div>"
     components.html(html, height=900, scrolling=True)
 # =================================================
 # TEAM STANDINGS (BASIC, STABLE)
