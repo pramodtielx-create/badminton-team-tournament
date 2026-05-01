@@ -96,12 +96,12 @@ def load_results():
 # =================================================
 # MENU
 # =================================================
+
 menu = st.radio(
     "Navigate",
-    ["Overview", "Fixtures", "Results", "Team Standings", "Player Standings", "Insights"],
+    ["Overview", "Fixtures", "Results", "Teams", "Team Standings", "Player Standings","Insights"],
     horizontal=True
 )
-
 # =================================================
 # OVERVIEW
 # =================================================
@@ -463,20 +463,34 @@ elif menu == "Team Standings":
 
     st.dataframe(df, use_container_width=True)
 
+#Teams###########################################
 elif menu == "Teams":
-    st.subheader("🏸 Teams & Players")
+    st.subheader("🏸 Team Squads")
 
-    # Create exactly 4 columns
-    cols = st.columns(4)
+    import pandas as pd
 
-    for col, (team, players) in zip(cols, teams_data.items()):
-        with col:
-            # Card‑like container using Streamlit primitives (stable)
-            st.markdown(f"### {team}")
-            st.divider()
+    # teams_data is already defined in your app
+    # Example:
+    # teams_data = {
+    #   "Smash Titans": [...],
+    #   "Quantum Force": [...],
+    #   "Racket Scientists": [...],
+    #   "Net Ninjas": [...]
+    # }
 
-            for p in players:
-                st.write(f"• {p}")
+    # Find the max number of players in any team
+    max_len = max(len(players) for players in teams_data.values())
+
+    table = {}
+
+    for team, players in teams_data.items():
+        # Pad with empty strings so all columns are equal length
+        padded_players = players + [""] * (max_len - len(players))
+        table[team] = padded_players
+
+    df = pd.DataFrame(table)
+
+    st.dataframe(df, use_container_width=True, hide_index=True)
 # =================================================
 # PLAYER STANDINGS
 # =================================================
