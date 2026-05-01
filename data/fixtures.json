@@ -7,9 +7,9 @@
     "toss": "Smash Titans",
     "service": "Quantum Force",
     "matches": [
-      ["Omkar / Ganesh", "Rajendra / Deepak L"],
-      ["Sandeep W / Amit", "Aniket / Manmohan"],
-      ["Nishit / Jayant", "Rahul / Prashant"]
+      ["Jayant / Amit", "Rajendra / Aniket"],
+      ["Omkar / Sandeep W", "Deepak L / Rahul"],
+      ["Nishit / Ganesh", "Manmohan / Prashant"]
     ]
   },
   {
@@ -20,9 +20,9 @@
     "toss": "Net Ninjas",
     "service": "Racket Scientists",
     "matches": [
-      ["Kiran / Pradyum", "Jaswanth / Vikram"],
-      ["Kaustubh / Amol S", "Ritesh / Pramod"],
-      ["Piyush / Amol P", "Sandeepk / Deepak T"]
+      ["Kaustubh / Piyush", "Sandeepk / Vikram"],
+      ["Kiran / Amol S", "Jaswanth / Pramod"],
+      ["Pradyum / Amol P", "Ritesh / Deepak T"]
     ]
   },
   {
@@ -33,9 +33,9 @@
     "toss": "Racket Scientists",
     "service": "Smash Titans",
     "matches": [
-      ["Omkar / Nishit", "Kiran / Piyush"],
-      ["Sandeep W / Jayant", "Amol S / Amol P"],
-      ["Ganesh / Amit", "Kaustubh / Pradyum"]
+      ["Jayant / Amit", "Amol S / Pradyum"],
+      ["Nishit / Sandeep W", "Kiran / Kaustubh"],
+      ["Omkar / Ganesh", "Piyush / Amol P"]
     ]
   },
   {
@@ -43,12 +43,12 @@
     "tie_id": 4,
     "team_a": "Quantum Force",
     "team_b": "Net Ninjas",
-    "toss": "Net Ninjas",
-    "service": "Quantum Force",
+    "toss": "Quantum Force",
+    "service": "Net Ninjas",
     "matches": [
-      ["Rajendra / Aniket", "Jaswanth / Sandeepk"],
-      ["Manmohan / Prashant", "Vikram / Deepak T"],
-      ["Deepak L / Rahul", "Ritesh / Pramod"]
+      ["Rajendra / Deepak L", "Jaswanth / Ritesh"],
+      ["Aniket / Manmohan", "Sandeepk / Vikram"],
+      ["Rahul / Prashant", "Pramod / Deepak T"]
     ]
   },
   {
@@ -59,9 +59,9 @@
     "toss": "Smash Titans",
     "service": "Net Ninjas",
     "matches": [
-      ["Nishit / Jayant", "Pramod / Vikram"],
-      ["Amit / Ganesh", "Sandeepk / Ritesh"],
-      ["Omkar / Sandeep W", "Jaswanth / Deepak T"]
+      ["Jayant / Sandeep W", "Pramod / Deepak T"],
+      ["Nishit / Omkar", "Jaswanth / Sandeepk"],
+      ["Ganesh / Amit", "Vikram / Ritesh"]
     ]
   },
   {
@@ -69,91 +69,93 @@
     "tie_id": 6,
     "team_a": "Quantum Force",
     "team_b": "Racket Scientists",
-    "toss": "Racket Scientists",
-    "service": "Quantum Force",
+    "toss": "Quantum Force",
+    "service": "Racket Scientists",
     "matches": [
-      ["Rahul / Manmohan", "Amol S / Amol P"],
-      ["Aniket / Deepak L", "Kaustubh / Piyush"],
-      ["Rajendra / Prashant", "Kiran / Pradyum"]
+      ["Rajendra / Aniket", "Kiran / Piyush"],
+      ["Deepak L / Manmohan", "Kaustubh / Amol P"],
+      ["Rahul / Prashant", "Amol S / Pradyum"]
     ]
   },
 
+  /* ================= ROUND 2 (ALIGNED) ================= */
+
   {
     "round_no": 2,
-    "tie_id": 101,
+    "tie_id": 201,
     "team_a": "Smash Titans",
     "team_b": "Quantum Force",
     "toss": "Quantum Force",
     "service": "Smash Titans",
     "matches": [
-      ["SMASH1 / SMASH2", "QUANTUM1 / QUANTUM2"],
-      ["SMASH3 / SMASH4", "QUANTUM3 / QUANTUM4"],
-      ["SMASH5 / SMASH6", "QUANTUM5 / QUANTUM6"]
+      ["Jayant / Amit", "Rajendra / Aniket"],
+      ["Omkar / Sandeep W", "Deepak L / Rahul"],
+      ["Nishit / Ganesh", "Manmohan / Prashant"]
     ]
   },
   {
     "round_no": 2,
-    "tie_id": 102,
+    "tie_id": 202,
     "team_a": "Racket Scientists",
     "team_b": "Net Ninjas",
-    "toss": "Racket Scientists",
-    "service": "Net Ninjas",
+    "toss": "Net Ninjas",
+    "service": "Racket Scientists",
     "matches": [
-      ["SCIENTIST1 / SCIENTIST2", "NINJA1 / NINJA2"],
-      ["SCIENTIST3 / SCIENTIST4", "NINJA3 / NINJA4"],
-      ["SCIENTIST5 / SCIENTIST6", "NINJA5 / NINJA6"]
+      ["Kaustubh / Piyush", "Sandeepk / Vikram"],
+      ["Kiran / Amol S", "Jaswanth / Pramod"],
+      ["Pradyum / Amol P", "Ritesh / Deepak T"]
     ]
   },
   {
     "round_no": 2,
-    "tie_id": 103,
+    "tie_id": 203,
     "team_a": "Smash Titans",
     "team_b": "Racket Scientists",
     "toss": "Smash Titans",
     "service": "Racket Scientists",
     "matches": [
-      ["SMASH1 / SMASH2", "SCIENTIST1 / SCIENTIST2"],
-      ["SMASH3 / SMASH4", "SCIENTIST3 / SCIENTIST4"],
-      ["SMASH5 / SMASH6", "SCIENTIST5 / SCIENTIST6"]
+      ["Jayant / Amit", "TBD"],
+      ["Nishit / Sandeep W", "TBD"],
+      ["Omkar / Ganesh", "TBD"]
     ]
   },
   {
     "round_no": 2,
-    "tie_id": 104,
+    "tie_id": 204,
     "team_a": "Quantum Force",
     "team_b": "Net Ninjas",
     "toss": "Quantum Force",
     "service": "Net Ninjas",
     "matches": [
-      ["QUANTUM1 / QUANTUM2", "NINJA1 / NINJA2"],
-      ["QUANTUM3 / QUANTUM4", "NINJA3 / NINJA4"],
-      ["QUANTUM5 / QUANTUM6", "NINJA5 / NINJA6"]
+      ["Rajendra / Deepak L", "TBD"],
+      ["Aniket / Manmohan", "TBD"],
+      ["Rahul / Prashant", "TBD"]
     ]
   },
   {
     "round_no": 2,
-    "tie_id": 105,
+    "tie_id": 205,
     "team_a": "Smash Titans",
     "team_b": "Net Ninjas",
-    "toss": "Net Ninjas",
-    "service": "Smash Titans",
+    "toss": "Smash Titans",
+    "service": "Net Ninjas",
     "matches": [
-      ["SMASH1 / SMASH2", "NINJA1 / NINJA2"],
-      ["SMASH3 / SMASH4", "NINJA3 / NINJA4"],
-      ["SMASH5 / SMASH6", "NINJA5 / NINJA6"]
+      ["Jayant / Sandeep W", "TBD"],
+      ["Nishit / Omkar", "TBD"],
+      ["Ganesh / Amit", "TBD"]
     ]
   },
   {
     "round_no": 2,
-    "tie_id": 106,
+    "tie_id": 206,
     "team_a": "Quantum Force",
     "team_b": "Racket Scientists",
     "toss": "Quantum Force",
     "service": "Racket Scientists",
     "matches": [
-      ["QUANTUM1 / QUANTUM2", "SCIENTIST1 / SCIENTIST2"],
-      ["QUANTUM3 / QUANTUM4", "SCIENTIST3 / SCIENTIST4"],
-      ["QUANTUM5 / QUANTUM6", "SCIENTIST5 / SCIENTIST6"]
+      ["Rajendra / Aniket", "TBD"],
+      ["Deepak L / Manmohan", "TBD"],
+      ["Rahul / Prashant", "TBD"]
     ]
   }
 ]
