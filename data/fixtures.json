@@ -7,9 +7,9 @@
     "toss": "Smash Titans",
     "service": "Quantum Force",
     "matches": [
-      ["Jayant / Amit", "Rajendra / Aniket"],
-      ["Omkar / Sandeep W", "Deepak L / Rahul"],
-      ["Nishit / Ganesh", "Manmohan / Prashant"]
+      ["Omkar / Ganesh", "Rajendra / Deepak L"],
+      ["Sandeep W / Amit", "Aniket / Manmohan"],
+      ["Nishit / Jayant", "Rahul / Prashant"]
     ]
   },
   {
@@ -20,9 +20,9 @@
     "toss": "Net Ninjas",
     "service": "Racket Scientists",
     "matches": [
-      ["Kaustubh / Piyush", "Sandeepk / Vikram"],
-      ["Kiran / Amol S", "Jaswanth / Pramod"],
-      ["Pradyum / Amol P", "Ritesh / Deepak T"]
+      ["Kiran / Pradyum", "Jaswanth / Vikram"],
+      ["Kaustubh / Amol S", "Ritesh / Pramod"],
+      ["Piyush / Amol P", "Sandeepk / Deepak T"]
     ]
   },
   {
@@ -33,9 +33,9 @@
     "toss": "Racket Scientists",
     "service": "Smash Titans",
     "matches": [
-      ["Jayant / Amit", "Amol S / Pradyum"],
-      ["Nishit / Sandeep W", "Kiran / Kaustubh"],
-      ["Omkar / Ganesh", "Piyush / Amol P"]
+      ["Omkar / Nishit", "Kiran / Piyush"],
+      ["Sandeep W / Jayant", "Amol S / Amol P"],
+      ["Ganesh / Amit", "Kaustubh / Pradyum"]
     ]
   },
   {
@@ -43,12 +43,12 @@
     "tie_id": 4,
     "team_a": "Quantum Force",
     "team_b": "Net Ninjas",
-    "toss": "Quantum Force",
-    "service": "Net Ninjas",
+    "toss": "Net Ninjas",
+    "service": "Quantum Force",
     "matches": [
-      ["Rajendra / Deepak L", "Jaswanth / Ritesh"],
-      ["Aniket / Manmohan", "Sandeepk / Vikram"],
-      ["Rahul / Prashant", "Pramod / Deepak T"]
+      ["Rajendra / Aniket", "Jaswanth / Sandeepk"],
+      ["Manmohan / Prashant", "Vikram / Deepak T"],
+      ["Deepak L / Rahul", "Ritesh / Pramod"]
     ]
   },
   {
@@ -59,9 +59,9 @@
     "toss": "Smash Titans",
     "service": "Net Ninjas",
     "matches": [
-      ["Jayant / Sandeep W", "Pramod / Deepak T"],
-      ["Nishit / Omkar", "Jaswanth / Sandeepk"],
-      ["Ganesh / Amit", "Vikram / Ritesh"]
+      ["Nishit / Jayant", "Pramod / Vikram"],
+      ["Amit / Ganesh", "Sandeepk / Ritesh"],
+      ["Omkar / Sandeep W", "Jaswanth / Deepak T"]
     ]
   },
   {
@@ -69,13 +69,14 @@
     "tie_id": 6,
     "team_a": "Quantum Force",
     "team_b": "Racket Scientists",
-    "toss": "Quantum Force",
-    "service": "Racket Scientists",
+    "toss": "Racket Scientists",
+    "service": "Quantum Force",
     "matches": [
-      ["Rajendra / Aniket", "Kiran / Piyush"],
-      ["Deepak L / Manmohan", "Kaustubh / Amol P"],
-      ["Rahul / Prashant", "Amol S / Pradyum"]
+      ["Rahul / Manmohan", "Amol S / Amol P"],
+      ["Aniket / Deepak L", "Kaustubh / Piyush"],
+      ["Rajendra / Prashant", "Kiran / Pradyum"]
     ]
+  
   },
 
   {
