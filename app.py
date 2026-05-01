@@ -370,10 +370,10 @@ elif menu == "Results":
         )
         st.stop()
 
-    # ==================================================
-    # RESULTS UI — TWO CARDS PER ROW ✅
-    # ==================================================
-  elif menu == "Results":
+# ==================================================
+# RESULTS UI — TWO CARDS PER ROW ✅
+# ==================================================
+   elif menu == "Results":
     import streamlit.components.v1 as components
 
     st.subheader("Results")
