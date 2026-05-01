@@ -129,34 +129,79 @@ elif menu == "Fixtures":
 
     results = load_results()
 
-    # ✅ Group fixtures by round_no
-    fixtures_by_round = defaultdict(list)
+    # ==================================================
+    # FILTER CHECKBOXES (REPLACES SELECTBOX)
+    # ==================================================
+    c1, c2, c3, c4 = st.columns(4)
+
+    with c1:
+        show_round_1 = st.checkbox("Round 1", value=False)
+    with c2:
+        show_round_2 = st.checkbox("Round 2", value=True)   # ✅ default
+    with c3:
+        show_completed = st.checkbox("Completed", value=False)
+    with c4:
+        show_pending = st.checkbox("Pending", value=True)  # ✅ default
+
+    # ==================================================
+    # HELPER: fixture status
+    # ==================================================
+    def fixture_completed(f):
+        match_results = results.get(f["tie_id"], {}).get("matches", [])
+        completed_count = sum(
+            1 for m in match_results if m and "sets" in m
+        )
+        return completed_count == len(f["matches"])
+
+    # ==================================================
+    # FILTER FIXTURES BASED ON CHECKBOXES
+    # ==================================================
+    filtered_fixtures = []
     for f in fixtures:
-        fixtures_by_round[f.get("round_no", 1)].append(f)
-
-    available_rounds = sorted(fixtures_by_round.keys())
-
-    selected_round = st.selectbox(
-        "Select Round",
-        available_rounds
-    )
-
-    # ✅ Round summary
-    total_ties = len(fixtures_by_round[selected_round])
-    total_matches = total_ties * 3
-
-    completed_matches = 0
-    for f in fixtures_by_round[selected_round]:
-        completed_matches += sum(
-            1 for m in results.get(f["tie_id"], {}).get("matches", [])
-            if m and "sets" in m
+        # round filter
+        round_ok = (
+            (f.get("round_no") == 1 and show_round_1) or
+            (f.get("round_no") == 2 and show_round_2)
         )
 
+        if not round_ok:
+            continue
+
+        completed = fixture_completed(f)
+
+        # status filter
+        status_ok = (
+            (completed and show_completed) or
+            (not completed and show_pending)
+        )
+
+        if status_ok:
+            filtered_fixtures.append(f)
+
+    if not filtered_fixtures:
+        st.info("No fixtures match the selected filters.")
+        st.stop()
+
+    # ==================================================
+    # SUMMARY (UNCHANGED LOOK & FEEL)
+    # ==================================================
+    total_ties = len(filtered_fixtures)
+    total_matches = total_ties * 3
+    completed_matches = sum(
+        1
+        for f in filtered_fixtures
+        for m in results.get(f["tie_id"], {}).get("matches", [])
+        if m and "sets" in m
+    )
+
     st.info(
-        f"📊 **Round {selected_round} Summary:** "
+        f"📊 **Fixtures Summary:** "
         f"{completed_matches} / {total_matches} matches completed"
     )
 
+    # ==================================================
+    # HTML (UNCHANGED)
+    # ==================================================
     html = """
     <style>
         .grid {
@@ -210,7 +255,7 @@ elif menu == "Fixtures":
     <div class="grid">
     """
 
-    for f in fixtures_by_round[selected_round]:
+    for f in filtered_fixtures:
         tie_id = f["tie_id"]
         match_results = results.get(tie_id, {}).get("matches", [])
 
