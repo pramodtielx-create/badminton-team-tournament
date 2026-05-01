@@ -143,17 +143,18 @@
       ["Ganesh / Amit", "TBD"]
     ]
   },
-  {
-    "round_no": 2,
-    "tie_id": 206,
-    "team_a": "Quantum Force",
-    "team_b": "Racket Scientists",
-    "toss": "Quantum Force",
-    "service": "Racket Scientists",
-    "matches": [
-      ["Rajendra / Aniket", "TBD"],
-      ["Deepak L / Manmohan", "TBD"],
-      ["Rahul / Prashant", "TBD"]
-    ]
-  }
+ {
+  "round_no": 2,
+  "tie_id": 206,
+  "team_a": "Quantum Force",
+  "team_b": "Racket Scientists",
+  "toss": "Quantum Force",
+  "service": "Racket Scientists",
+  "matches": [
+    ["Rajendra / Aniket", "Kiran / Piyush"],
+    ["Deepak L / Manmohan", "Kaustubh / Amol P"],
+    ["Rahul / Prashant", "Amol S / Pradyum"]
+  ]
+}
+
 ]
