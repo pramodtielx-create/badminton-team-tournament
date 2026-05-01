@@ -373,6 +373,53 @@ elif menu == "Results":
     # ==================================================
     # RESULTS UI — TWO CARDS PER ROW ✅
     # ==================================================
+  elif menu == "Results":
+    import streamlit.components.v1 as components
+
+    st.subheader("Results")
+
+    results = load_results()
+
+    # ================= FILTERS =================
+    c1, c2, c3, c4 = st.columns(4)
+    with c1:
+        show_round_1 = st.checkbox("Round 1", value=False, key="res_r1")
+    with c2:
+        show_round_2 = st.checkbox("Round 2", value=True, key="res_r2")
+    with c3:
+        show_completed = st.checkbox("Completed", value=False, key="res_done")
+    with c4:
+        show_pending = st.checkbox("Pending", value=True, key="res_pending")
+
+    def fixture_completed(f):
+        mr = results.get(f["tie_id"], {}).get("matches")
+        if not mr:
+            return False
+        return sum(1 for m in mr if m and "sets" in m) == len(f["matches"])
+
+    filtered_fixtures = []
+    for f in fixtures:
+        round_ok = (
+            (f["round_no"] == 1 and show_round_1) or
+            (f["round_no"] == 2 and show_round_2)
+        )
+        if not round_ok:
+            continue
+
+        completed = fixture_completed(f)
+        status_ok = (
+            (completed and show_completed) or
+            (not completed and show_pending)
+        )
+
+        if status_ok:
+            filtered_fixtures.append(f)
+
+    if not filtered_fixtures:
+        st.info("No results match the selected filters.")
+        st.stop()
+
+    # ================= UI =================
     html = """
     <style>
         .grid {
@@ -381,25 +428,26 @@ elif menu == "Results":
             gap: 24px;
         }
         .result-card {
-            background:#ffffff;
-            border:1px solid #e5e7eb;
-            border-radius:14px;
-            padding:18px;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 18px;
         }
         .match {
-            padding:6px 0;
-            font-size:14px;
+            padding: 6px 0;
+            font-size: 14px;
+            color: #374151;   /* ✅ CRITICAL FIX */
         }
         .winner {
-            color:#16a34a;
-            font-weight:600;
+            color: #16a34a;
+            font-weight: 600;
         }
         .loser {
-            color:#6b7280;
+            color: #6b7280;
         }
         .score {
-            font-weight:600;
-            margin-left:6px;
+            font-weight: 600;
+            margin-left: 6px;
         }
     </style>
 
@@ -408,7 +456,7 @@ elif menu == "Results":
 
     for f in filtered_fixtures:
         tid = f["tie_id"]
-        r = results.get(tid, {"matches": []})
+        result_matches = results.get(tid, {}).get("matches", [])
 
         html += f"""
         <div class="result-card">
@@ -417,25 +465,29 @@ elif menu == "Results":
             </div>
         """
 
-        for idx, m in enumerate(r["matches"], start=1):
-            if not m or "sets" not in m:
-                html += f"<div class='match'>M{idx}: Pending</div>"
+        for idx, (pA, pB) in enumerate(f["matches"], start=1):
+            match_data = result_matches[idx - 1] if idx - 1 < len(result_matches) else None
+
+            if not match_data or "sets" not in match_data:
+                html += f"""
+                <div class="match">
+                    <strong>M{idx}</strong>: {pA} vs {pB} — Pending
+                </div>
+                """
                 continue
 
-            a_sets = sum(1 for a, b in m["sets"] if a > b)
-            b_sets = len(m["sets"]) - a_sets
-            score = " | ".join(f"{a}-{b}" for a, b in m["sets"])
+            a_sets = sum(1 for a, b in match_data["sets"] if a > b)
+            b_sets = len(match_data["sets"]) - a_sets
+            score = " | ".join(f"{a}-{b}" for a, b in match_data["sets"])
 
-            win_class = "winner" if a_sets > b_sets else "loser"
-            lose_class = "loser" if a_sets > b_sets else "winner"
-
-            pA, pB = f["matches"][idx - 1]
+            win = "winner" if a_sets > b_sets else "loser"
+            lose = "loser" if a_sets > b_sets else "winner"
 
             html += f"""
             <div class="match">
-                <span class="{win_class}">{pA}</span>
+                <span class="{win}">{pA}</span>
                 vs
-                <span class="{lose_class}">{pB}</span>
+                <span class="{lose}">{pB}</span>
                 <span class="score">({score})</span>
             </div>
             """
@@ -445,6 +497,7 @@ elif menu == "Results":
     html += "</div>"
 
     components.html(html, height=900, scrolling=True)
+
 # =================================================
 # TEAM STANDINGS (BASIC, STABLE)
 # =================================================
