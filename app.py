@@ -615,57 +615,56 @@ elif menu == "Player Standings":
                     stats[p]["Losses"] += 1
                     stats[p]["Form"].append("L")
 
-    # Build DataFrame
-    df = pd.DataFrame.from_dict(stats, orient="index")
+   # Build DataFrame
+df = pd.DataFrame.from_dict(stats, orient="index")
 
-    df["Set Diff"] = df["Sets Won"] - df["Sets Lost"]
-    df["Point Diff"] = df["Points Won"] - df["Points Lost"]
-    df["Recent Form"] = df["Form"].apply(lambda x: " ".join(x[-5:]))
+# Derived stats
+df["Set Diff"] = df["Sets Won"] - df["Sets Lost"]
+df["Point Diff"] = df["Points Won"] - df["Points Lost"]
+df["Recent Form"] = df["Form"].apply(lambda x: " ".join(x[-5:]))
 
-    df = df.drop(columns=["Form"])
+df = df.drop(columns=["Form"])
 
-    # Sort standings
-    df = df.sort_values(
-        by=["Wins", "Set Diff", "Point Diff", "Played"],
-        ascending=[False, False, False, True]
-    )
-    
-    # ✅ Show only Top 10 players
-    df_players = df_players.head(10)
+# Sort standings
+df = df.sort_values(
+    by=["Wins", "Set Diff", "Point Diff", "Played"],
+    ascending=[False, False, False, True]
+)
 
-    st.dataframe(df_players, use_container_width=True)
+# Add Rank BEFORE slicing
+df.insert(0, "Rank", range(1, len(df) + 1))
 
-    # Add Rank column
-    df.insert(0, "Rank", range(1, len(df) + 1))
+# Move Player name from index to column
+df = df.reset_index().rename(columns={"index": "Player"})
 
-    # Move Player name from index to column
-    df = df.reset_index().rename(columns={"index": "Player"})
+# ✅ Show only Top 10 players
+df = df.head(10)
 
-    # Final column order (as requested)
-    column_order = [
-        "Team",
-        "Rank",
-        "Player",
-        "Played",
-        "Wins",
-        "Losses",
-        "Sets Won",
-        "Sets Lost",
-        "Set Diff",
-        "Points Won",
-        "Points Lost",
-        "Point Diff",
-        "Recent Form"
-    ]
+# Final column order
+column_order = [
+    "Team",
+    "Rank",
+    "Player",
+    "Played",
+    "Wins",
+    "Losses",
+    "Sets Won",
+    "Sets Lost",
+    "Set Diff",
+    "Points Won",
+    "Points Lost",
+    "Point Diff",
+    "Recent Form"
+]
 
-    df = df[column_order]
+df = df[column_order]
 
-    # Display without index (removes 0 / duplicate ranking column)
-    st.dataframe(
-        df,
-        use_container_width=True,
-        hide_index=True
-    )
+# Display
+st.dataframe(
+    df,
+    use_container_width=True,
+    hide_index=True
+)
 
 # =================================================
 # INSIGHTS
