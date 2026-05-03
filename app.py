@@ -544,13 +544,25 @@ elif menu == "Teams":
 # =================================================
 # PLAYER STANDINGS
 # =================================================
+# =================================================
+# PLAYER STANDINGS
+# =================================================
 elif menu == "Player Standings":
-    st.subheader("👤 Player Standings — Top 10")
+    st.subheader("👤 Player Standings")
 
     results = load_results()
 
     from collections import defaultdict
     import pandas as pd
+
+    # ---------------------------------------------
+    # Toggle controls
+    # ---------------------------------------------
+    col1, col2 = st.columns([2, 1])
+    with col1:
+        st.caption("Ranked based on Wins → Set Diff → Point Diff → Played")
+    with col2:
+        show_all = st.checkbox("Show All Players", value=False)
 
     # ---------------------------------------------
     # Initialize stats
@@ -575,7 +587,7 @@ elif menu == "Player Standings":
             stats[p]["Team"] = team
 
     # ---------------------------------------------
-    # Process match results
+    # Process results
     # ---------------------------------------------
     for tid, r in results.items():
         fixture = next((f for f in fixtures if f["tie_id"] == tid), None)
@@ -599,7 +611,7 @@ elif menu == "Player Standings":
                 else:
                     b_sets += 1
 
-            # Team A players
+            # Team A
             for p in team_a_players:
                 stats[p]["Played"] += 1
                 stats[p]["Sets Won"] += a_sets
@@ -613,7 +625,7 @@ elif menu == "Player Standings":
                     stats[p]["Losses"] += 1
                     stats[p]["Form"].append("L")
 
-            # Team B players
+            # Team B
             for p in team_b_players:
                 stats[p]["Played"] += 1
                 stats[p]["Sets Won"] += b_sets
@@ -634,12 +646,16 @@ elif menu == "Player Standings":
 
     df["Set Diff"] = df["Sets Won"] - df["Sets Lost"]
     df["Point Diff"] = df["Points Won"] - df["Points Lost"]
+    df["Win %"] = df.apply(
+        lambda r: round((r["Wins"] / r["Played"]) * 100, 1) if r["Played"] > 0 else 0,
+        axis=1
+    )
     df["Recent Form"] = df["Form"].apply(lambda x: " ".join(x[-5:]))
 
     df = df.drop(columns=["Form"])
 
     # ---------------------------------------------
-    # Sort standings (International‑style tiebreaks)
+    # Sort standings
     # ---------------------------------------------
     df = df.sort_values(
         by=["Wins", "Set Diff", "Point Diff", "Played"],
@@ -647,27 +663,38 @@ elif menu == "Player Standings":
     )
 
     # ---------------------------------------------
-    # Add Rank BEFORE slicing
+    # Rank + Player column
     # ---------------------------------------------
     df.insert(0, "Rank", range(1, len(df) + 1))
-
-    # Move player name into column
     df = df.reset_index().rename(columns={"index": "Player"})
 
-    # ✅ Show only Top 10
-    df = df.head(10)
+    # ---------------------------------------------
+    # 🥇🥈🥉 Medal icons for Top 3
+    # ---------------------------------------------
+    def medal(rank):
+        return "🥇" if rank == 1 else "🥈" if rank == 2 else "🥉" if rank == 3 else ""
+
+    df["Medal"] = df["Rank"].apply(medal)
+
+    # ---------------------------------------------
+    # Top‑10 logic
+    # ---------------------------------------------
+    if not show_all:
+        df = df.head(10)
 
     # ---------------------------------------------
     # Final column order
     # ---------------------------------------------
     df = df[
         [
-            "Team",
             "Rank",
+            "Medal",
             "Player",
+            "Team",
             "Played",
             "Wins",
             "Losses",
+            "Win %",
             "Sets Won",
             "Sets Lost",
             "Set Diff",
