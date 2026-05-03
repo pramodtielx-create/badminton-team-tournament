@@ -633,7 +633,7 @@ elif menu == "Player Standings":
     # ✅ Show only Top 10 players
     df_players = df_players.head(10)
 
-st.dataframe(df_players, use_container_width=True)
+    st.dataframe(df_players, use_container_width=True)
 
     # Add Rank column
     df.insert(0, "Rank", range(1, len(df) + 1))
