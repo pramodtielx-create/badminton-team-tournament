@@ -541,14 +541,20 @@ elif menu == "Teams":
 # =================================================
 # PLAYER STANDINGS
 # =================================================
+# =================================================
+# PLAYER STANDINGS
+# =================================================
 elif menu == "Player Standings":
-    st.subheader("👤 Player Standings")
+    st.subheader("👤 Player Standings — Top 10")
 
     results = load_results()
 
     from collections import defaultdict
     import pandas as pd
 
+    # ---------------------------------------------
+    # Initialize stats
+    # ---------------------------------------------
     stats = defaultdict(lambda: {
         "Team": "",
         "Played": 0,
@@ -561,17 +567,23 @@ elif menu == "Player Standings":
         "Form": []
     })
 
+    # ---------------------------------------------
     # Assign teams to players
+    # ---------------------------------------------
     for team, players in teams_data.items():
         for p in players:
             stats[p]["Team"] = team
 
-    # Process results
+    # ---------------------------------------------
+    # Process match results
+    # ---------------------------------------------
     for tid, r in results.items():
-        fixture = next(f for f in fixtures if f["tie_id"] == tid)
+        fixture = next((f for f in fixtures if f["tie_id"] == tid), None)
+        if not fixture:
+            continue
 
-        for idx, m in enumerate(r["matches"]):
-            if not m:
+        for idx, m in enumerate(r.get("matches", [])):
+            if not m or "sets" not in m:
                 continue
 
             pair_a, pair_b = fixture["matches"][idx]
@@ -615,57 +627,61 @@ elif menu == "Player Standings":
                     stats[p]["Losses"] += 1
                     stats[p]["Form"].append("L")
 
-   # Build DataFrame
-df = pd.DataFrame.from_dict(stats, orient="index")
+    # ---------------------------------------------
+    # Build DataFrame
+    # ---------------------------------------------
+    df = pd.DataFrame.from_dict(stats, orient="index")
 
-# Derived stats
-df["Set Diff"] = df["Sets Won"] - df["Sets Lost"]
-df["Point Diff"] = df["Points Won"] - df["Points Lost"]
-df["Recent Form"] = df["Form"].apply(lambda x: " ".join(x[-5:]))
+    df["Set Diff"] = df["Sets Won"] - df["Sets Lost"]
+    df["Point Diff"] = df["Points Won"] - df["Points Lost"]
+    df["Recent Form"] = df["Form"].apply(lambda x: " ".join(x[-5:]))
 
-df = df.drop(columns=["Form"])
+    df = df.drop(columns=["Form"])
 
-# Sort standings
-df = df.sort_values(
-    by=["Wins", "Set Diff", "Point Diff", "Played"],
-    ascending=[False, False, False, True]
-)
+    # ---------------------------------------------
+    # Sort standings (International‑style tiebreaks)
+    # ---------------------------------------------
+    df = df.sort_values(
+        by=["Wins", "Set Diff", "Point Diff", "Played"],
+        ascending=[False, False, False, True]
+    )
 
-# Add Rank BEFORE slicing
-df.insert(0, "Rank", range(1, len(df) + 1))
+    # ---------------------------------------------
+    # Add Rank BEFORE slicing
+    # ---------------------------------------------
+    df.insert(0, "Rank", range(1, len(df) + 1))
 
-# Move Player name from index to column
-df = df.reset_index().rename(columns={"index": "Player"})
+    # Move player name into column
+    df = df.reset_index().rename(columns={"index": "Player"})
 
-# ✅ Show only Top 10 players
-df = df.head(10)
+    # ✅ Show only Top 10
+    df = df.head(10)
 
-# Final column order
-column_order = [
-    "Team",
-    "Rank",
-    "Player",
-    "Played",
-    "Wins",
-    "Losses",
-    "Sets Won",
-    "Sets Lost",
-    "Set Diff",
-    "Points Won",
-    "Points Lost",
-    "Point Diff",
-    "Recent Form"
-]
+    # ---------------------------------------------
+    # Final column order
+    # ---------------------------------------------
+    df = df[
+        [
+            "Team",
+            "Rank",
+            "Player",
+            "Played",
+            "Wins",
+            "Losses",
+            "Sets Won",
+            "Sets Lost",
+            "Set Diff",
+            "Points Won",
+            "Points Lost",
+            "Point Diff",
+            "Recent Form"
+        ]
+    ]
 
-df = df[column_order]
-
-# Display
-st.dataframe(
-    df,
-    use_container_width=True,
-    hide_index=True
-)
-
+    # ---------------------------------------------
+    # Display
+    # ---------------------------------------------
+    st.dataframe(df, use_container_width=True, hide_index=True)
 # =================================================
 # INSIGHTS
 # =================================================
