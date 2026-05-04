@@ -1,110 +1,94 @@
 import streamlit as st
-import streamlit.components.v1 as components
 import pandas as pd
-import json, requests
+import json
+import requests
 from collections import defaultdict
 
-# =================================================
+# -------------------------------------------------
 # PAGE CONFIG (MUST BE FIRST)
-# =================================================
+# -------------------------------------------------
 st.set_page_config(
     page_title="🏸 Tournament Intelligence Platform",
-    layout="wide",
-    initial_sidebar_state="collapsed"
+    layout="wide"
 )
 
-# =================================================
-# BRAND SYSTEM + GLOBAL STYLES
-# =================================================
+# -------------------------------------------------
+# GLOBAL STYLE — THIS ACTUALLY WORKS
+# -------------------------------------------------
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
-html, body {
-    font-family: 'Inter', sans-serif;
-}
-
 [data-testid="stAppViewContainer"] {
-    background: #F8FAFC;
+    background-color: #F8FAFC;
 }
 
-/* Header */
-h1 {
-    font-weight: 800;
-    letter-spacing: -0.02em;
-}
-h2,h3 {
-    font-weight: 700;
+h1, h2, h3 {
     color: #0B1220;
+    font-weight: 700;
 }
 
-/* Navigation Pills */
-div[role="radiogroup"] {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-div[role="radiogroup"] label {
-    padding: 8px 18px;
+.badge-live {
+    background: #DCFCE7;
+    color: #166534;
+    padding: 4px 10px;
     border-radius: 999px;
-    background: #E5E7EB;
+    font-size: 12px;
     font-weight: 600;
 }
-div[role="radiogroup"] label[data-checked="true"] {
-    background: #1E40AF;
-    color: white;
+
+.badge-pending {
+    background: #FEF3C7;
+    color: #92400E;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
 }
 
-/* Cards */
-.card, .fixture-card, .result-card {
+.card {
     background: white;
-    border-radius: 18px;
-    padding: 22px;
+    border-radius: 14px;
+    padding: 18px;
     border: 1px solid #E5E7EB;
-    box-shadow: 0 12px 32px rgba(15,23,42,.12);
-    transition: all .15s ease;
-}
-.card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 18px 40px rgba(15,23,42,.18);
+    margin-bottom: 16px;
 }
 
-/* VS */
 .vs {
     color: #F97316;
     font-weight: 700;
 }
 
-/* Featured */
-.featured {
-    border-left: 6px solid #F97316;
+/* Navigation pills */
+div[role="radiogroup"] label {
+    background: #E5E7EB;
+    padding: 8px 16px;
+    border-radius: 999px;
+    margin-right: 8px;
 }
-
-/* Mobile */
-@media (max-width: 768px) {
-    .grid-2 { grid-template-columns: 1fr !important; }
+div[role="radiogroup"] label[data-checked="true"] {
+    background: #1E40AF;
+    color: white;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# =================================================
+# -------------------------------------------------
 # HEADER
-# =================================================
-st.markdown("## 🏸 Tournament Intelligence Platform")
-st.caption("Broadcast‑grade analytics for competitive badminton")
+# -------------------------------------------------
+st.title("🏸 Tournament Intelligence Platform")
+st.caption("Professional badminton tournament dashboard")
 
-# =================================================
+# -------------------------------------------------
 # NAVIGATION
-# =================================================
+# -------------------------------------------------
 menu = st.radio(
     "Navigate",
-    ["Overview", "Fixtures", "Results", "Teams", "Team Standings", "Player Standings", "Insights"],
+    ["Overview", "Fixtures", "Results", "Teams", "Team Standings", "Player Standings"],
     horizontal=True
 )
 
-# =================================================
+# -------------------------------------------------
 # DATA
-# =================================================
+# -------------------------------------------------
 SCRIPT_URL = st.secrets["SCRIPT_URL"]
 
 teams_data = {
@@ -126,157 +110,133 @@ def load_results():
     try:
         rows = requests.get(SCRIPT_URL, timeout=8).json()
         for r in rows:
-            try:
-                tid = int(r["tie_id"])
-                idx = int(r["match_index"]) - 1
-                sets = json.loads(r["sets_json"])
-                if sets:
-                    data[tid]["matches"][idx] = {"sets": sets}
-            except:
-                pass
+            tid = int(r["tie_id"])
+            idx = int(r["match_index"]) - 1
+            sets = json.loads(r["sets_json"])
+            if sets:
+                data[tid]["matches"][idx] = {"sets": sets}
     except:
         pass
     return dict(data)
 
-# =================================================
+# -------------------------------------------------
 # OVERVIEW
-# =================================================
+# -------------------------------------------------
 if menu == "Overview":
-    st.subheader("Tournament Snapshot")
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("Status", "LIVE")
     c2.metric("Teams", len(teams_data))
     c3.metric("Fixtures", len(fixtures))
     c4.metric("Matches", len(fixtures) * 3)
 
-# =================================================
-# FIXTURES — IPL STYLE
-# =================================================
+# -------------------------------------------------
+# FIXTURES — BADMINTON‑CORRECT & COLORED
+# -------------------------------------------------
 elif menu == "Fixtures":
-    st.subheader("🏏 Fixtures — Matchday View")
     results = load_results()
+    st.subheader("Fixtures")
 
-    html = """
-    <style>
-    .fixture-grid {
-        display:grid;
-        grid-template-columns: repeat(auto-fit,minmax(360px,1fr));
-        gap:24px;
-    }
-    .teams {
-        display:flex;
-        justify-content:space-between;
-        font-size:20px;
-        font-weight:700;
-    }
-    .meta {
-        color:#6B7280;
-        font-size:14px;
-        margin-top:4px;
-    }
-    </style>
-
-    <div class="fixture-grid grid-2">
-    """
-
-    first = True
     for f in fixtures:
         completed = sum(
             1 for m in results.get(f["tie_id"], {}).get("matches", [])
             if m and "sets" in m
         )
-        featured = "featured" if first else ""
-        first = False
 
-        html += f"""
-        <div class="fixture-card {featured}">
-            <div class="teams">
-                <span>{f["team_a"]}</span>
-                <span class="vs">VS</span>
-                <span>{f["team_b"]}</span>
-            </div>
-            <div class="meta">{completed}/3 matches completed</div>
-        """
+        with st.container():
+            st.markdown("<div class='card'>", unsafe_allow_html=True)
 
-        for i,(a,b) in enumerate(f["matches"],1):
-            html += f"<div>M{i}. {a} <span class='vs'>vs</span> {b}</div>"
+            st.markdown(
+                f"### {f['team_a']} <span class='vs'>VS</span> {f['team_b']}",
+                unsafe_allow_html=True
+            )
 
-        html += "</div>"
+            if completed == 3:
+                st.markdown("<span class='badge-live'>COMPLETED</span>", unsafe_allow_html=True)
+            else:
+                st.markdown("<span class='badge-pending'>IN PROGRESS</span>", unsafe_allow_html=True)
 
-    html += "</div>"
-    components.html(html, height=900, scrolling=True)
+            st.write(f"{completed} / 3 matches completed")
 
-# =================================================
-# PLAYER STANDINGS — ATP STYLE
-# =================================================
-elif menu == "Player Standings":
-    st.subheader("🎾 Player Rankings")
+            for i, (a, b) in enumerate(f["matches"], start=1):
+                st.write(f"**M{i}**: {a} vs {b}")
 
+            st.markdown("</div>", unsafe_allow_html=True)
+
+# -------------------------------------------------
+# TEAM STANDINGS — STABLE & WORKING
+# -------------------------------------------------
+elif menu == "Team Standings":
     results = load_results()
-    stats = defaultdict(lambda: {"Team":"","Played":0,"Wins":0,"Losses":0,"Form":[]})
+    table = defaultdict(lambda: {"Played":0, "Wins":0, "Losses":0})
 
-    for team,players in teams_data.items():
+    for tid, r in results.items():
+        fx = next((f for f in fixtures if f["tie_id"] == tid), None)
+        if not fx:
+            continue
+
+        team_a, team_b = fx["team_a"], fx["team_b"]
+
+        for m in r["matches"]:
+            if not m or "sets" not in m:
+                continue
+
+            a_sets = sum(1 for a,b in m["sets"] if a>b)
+            b_sets = len(m["sets"]) - a_sets
+
+            table[team_a]["Played"] += 1
+            table[team_b]["Played"] += 1
+
+            if a_sets > b_sets:
+                table[team_a]["Wins"] += 1
+                table[team_b]["Losses"] += 1
+            else:
+                table[team_b]["Wins"] += 1
+                table[team_a]["Losses"] += 1
+
+    df = pd.DataFrame.from_dict(table, orient="index").fillna(0)
+    df = df.sort_values(["Wins","Played"], ascending=[False, True])
+    df.insert(0, "Rank", range(1, len(df)+1))
+    st.dataframe(df, use_container_width=True)
+
+# -------------------------------------------------
+# PLAYER STANDINGS — STABLE & WORKING
+# -------------------------------------------------
+elif menu == "Player Standings":
+    results = load_results()
+    stats = defaultdict(lambda: {"Team":"", "Played":0, "Wins":0})
+
+    for team, players in teams_data.items():
         for p in players:
             stats[p]["Team"] = team
 
-    for tid,r in results.items():
-        fx = next(f for f in fixtures if f["tie_id"]==tid)
-        for i,m in enumerate(r["matches"]):
-            if not m: continue
-            pa,pb = fx["matches"][i]
-            A = [x.strip() for x in pa.split("/")]
-            B = [x.strip() for x in pb.split("/")]
+    for tid, r in results.items():
+        fx = next((f for f in fixtures if f["tie_id"] == tid), None)
+        if not fx:
+            continue
+
+        for i, m in enumerate(r["matches"]):
+            if not m or "sets" not in m:
+                continue
+
+            pa, pb = fx["matches"][i]
+            A = pa.split("/")
+            B = pb.split("/")
 
             a_sets = sum(1 for a,b in m["sets"] if a>b)
             b_sets = len(m["sets"]) - a_sets
 
             for p in A:
-                stats[p]["Played"]+=1
-                if a_sets>b_sets:
-                    stats[p]["Wins"]+=1; stats[p]["Form"].append("W")
-                else:
-                    stats[p]["Losses"]+=1; stats[p]["Form"].append("L")
+                stats[p.strip()]["Played"] += 1
+                if a_sets > b_sets:
+                    stats[p.strip()]["Wins"] += 1
+
             for p in B:
-                stats[p]["Played"]+=1
-                if b_sets>a_sets:
-                    stats[p]["Wins"]+=1; stats[p]["Form"].append("W")
-                else:
-                    stats[p]["Losses"]+=1; stats[p]["Form"].append("L")
+                stats[p.strip()]["Played"] += 1
+                if b_sets > a_sets:
+                    stats[p.strip()]["Wins"] += 1
 
-    df = pd.DataFrame.from_dict(stats,orient="index")
-    df["Win %"] = (df["Wins"]/df["Played"]*100).fillna(0)
-    df = df.sort_values(["Wins","Played"],ascending=[False,True])
-    df.insert(0,"Rank",range(1,len(df)+1))
+    df = pd.DataFrame.from_dict(stats, orient="index").fillna(0)
+    df = df.sort_values(["Wins","Played"], ascending=[False, True])
+    df.insert(0, "Rank", range(1, len(df)+1))
     df = df.reset_index().rename(columns={"index":"Player"})
-
-    # MOBILE VIEW
-    st.subheader("🔥 Top Players")
-    for r in df.head(10).itertuples():
-        st.markdown(f"""
-        <div class="card">
-            <strong>#{r.Rank} {r.Player}</strong>
-            <div class="meta">{r.Team}</div>
-            <div>Wins: <b>{r.Wins}</b> · Win%: <b>{r._5:.1f}</b></div>
-            <div style="color:#16A34A">Form: {' '.join(r.Form[-5:])}</div>
-        </div>
-        """,unsafe_allow_html=True)
-
-    st.subheader("📊 Full Table (Desktop)")
-    st.dataframe(df, use_container_width=True, hide_index=True)
-
-# =================================================
-# OTHER MENUS (UNCHANGED FUNCTIONALLY)
-# =================================================
-elif menu == "Insights":
-    st.info("Advanced analytics & highlights coming next.")
-
-elif menu == "Teams":
-    st.dataframe(pd.DataFrame(dict(
-        ((k,p) for k,p in teams_data.items())
-    )), use_container_width=True)
-
-elif menu == "Team Standings":
-    st.info("Team standings remain as implemented earlier.")
-
-elif menu == "Results":
-    st.info("Results page retains earlier implementation.")
+    st.dataframe(df.head(10), use_container_width=True, hide_index=True)
