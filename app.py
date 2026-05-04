@@ -7,6 +7,61 @@ from collections import defaultdict
 
 
 # After imports, before menu
+st.markdown("""
+<style>
+/* Global background */
+[data-testid="stAppViewContainer"] {
+    background-color: #F8FAFC;
+}
+
+/* Main title */
+h1 {
+    color: #0F172A;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+/* Section headers */
+h2, h3 {
+    color: #0F172A;
+    font-weight: 700;
+}
+
+/* Navigation */
+div[role="radiogroup"] label {
+    font-weight: 600;
+    color: #334155;
+}
+
+/* Cards */
+.card, .result-card {
+    border-radius: 14px !important;
+    border: 1px solid #E5E7EB !important;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06) !important;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.card:hover, .result-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+}
+
+/* VS highlight */
+.vs {
+    color: #F97316 !important;
+    font-weight: 700;
+}
+
+/* Progress bars */
+.bar {
+    background: linear-gradient(90deg, #1D4ED8, #3B82F6);
+}
+
+/* Checkbox accent */
+input[type="checkbox"]:checked {
+    accent-color: #1D4ED8;
+}
+</style>
+""", unsafe_allow_html=True)
 components.html("""
 <style>
 @media (max-width: 768px) {
